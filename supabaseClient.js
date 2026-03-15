@@ -8,11 +8,6 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const token = sessionStorage.getItem("auth_token");
 const profileData = sessionStorage.getItem("user_profile");
 
-// Redirect if not logged in
-if (!token || !profileData) {
-    window.location.href = "../index.html";
-}
-
 const cachedProfile = JSON.parse(profileData);
 const { fullname, role, id: memberID, receiver: userGroup } = cachedProfile;
 
