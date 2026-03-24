@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   btnClear.addEventListener("click", resetForm);
 
   // --- ZXING QR SCANNER LOGIC (Updated for High-Res, Flash & Guide) ---
-  const videoEl = document.getElementById("video");
+ const videoEl = document.getElementById("video");
   const btnToggleFlash = document.getElementById("btnToggleFlash");
   const cameraOverlay = document.getElementById("cameraOverlay");
   
