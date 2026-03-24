@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partners Login</title>
+
+  <link rel="icon" href="../Kasangga New Logo Small.png" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Prevent browser caching -->
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+</head>
+
+<body>
+
+  <!-- Particles Background -->
+  <canvas id="particles-bg"></canvas>
+
+  <!-- Center Wrapper -->
+  <div class="page-center">
+    <div class="container">
+
+      <img src="../Clips/kbkheader.png" class="logo animate-fade" alt="logo">
+
+      <div id="loader" class="loader" style="display:none;"></div>
+
+      <p class="animate-fade delay-1">Partners Login</p>
+      <p id="error" class="animate-fade delay-2"></p>
+
+      <!-- Step 1 -->
+      <form id="formStep1" class="animate-fade delay-3">
+        <div id="step1">
+          <label for="idNumber">Username</label>
+          <input id="idNumber" name="idNumber" placeholder="Enter Username" autocomplete="off" required>
+          <button type="submit" id="nextBtn">Next</button>
+        </div>
+      </form>
+
+      <!-- Step 2 -->
+      <form id="formStep2" style="display:none;">
+        <div id="step2">
+          <label id="pinLabel" for="pin">Enter PIN</label>
+          <input id="pin" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" type="password" placeholder="6-digit PIN" autocomplete="off" required>
+          <button type="submit" id="loginBtn">Login</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <script src="../particles.js"></script>
+  <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,320 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #0f0f13;
+  color: #e0e0e0;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Gradient Orbs for Glassmorphism Background */
+.gradient-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  filter: blur(100px);
+  opacity: 0.7;
+}
+
+.g-orb {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  animation: floatMultiple 25s infinite linear;
+}
+
+.orb-violet {
+  width: 80vw;
+  height: 80vw;
+  background: radial-gradient(
+    circle at center,
+    rgba(138, 43, 226, 0.8) 0%,
+    rgba(138, 43, 226, 0) 70%
+  );
+  top: -15%;
+  left: -10%;
+  animation-duration: 10s;
+}
+
+.orb-green {
+  width: 90vw;
+  height: 90vw;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 255, 127, 0.7) 0%,
+    rgba(0, 255, 127, 0) 70%
+  );
+  bottom: -10%;
+  right: -25%;
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+
+.orb-red {
+  width: 70vw;
+  height: 70vw;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 50, 50, 0.7) 0%,
+    rgba(255, 50, 50, 0) 70%
+  );
+  top: 30%;
+  left: 20%;
+  animation-duration: 15s;
+}
+
+@keyframes floatMultiple {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translate(10vw, 5dvh) rotate(120deg) scale(1.1);
+  }
+  66% {
+    transform: translate(-5vw, 10dvh) rotate(240deg) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg) scale(1);
+  }
+}
+
+.app {
+  width: 100%;
+  max-width: 1000px;
+  height: 100vh;
+  margin: 0 auto;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 0 auto;
+  padding: 70px 16px 80px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.card {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  max-width: 280px;
+  justify-self: center;
+
+  perspective: 1000px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeSlideUp 0.6s ease forwards;
+}
+
+/* Tablet & Desktop Overrides */
+@media (min-width: 768px) {
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    padding: 30px 25px 100px;
+  }
+}
+
+/* Stagger effect per card */
+.card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+@keyframes fadeSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Glassmorphism Panel Class */
+.glass-panel {
+  background: rgba(25, 25, 25, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  color: #fff;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  padding: 20px;
+  visibility: hidden;
+}
+
+/* FULLSCREEN */
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 9999;
+}
+
+.fullscreen.active {
+  display: block;
+}
+
+.fs-inner {
+  width: 90%;
+  max-width: 800px;
+  height: 90%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  overflow-y: hidden;
+  transform: translate(-50%, -50%) rotateY(180deg);
+  animation: flipIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 1001;
+  border-radius: 16px;
+  flex-direction: column;
+  display: flex;
+}
+
+.fs-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 900;
+}
+
+.fullscreen.active .fs-backdrop {
+  opacity: 1;
+}
+
+@keyframes flipIn {
+  from {
+    transform: translate(-50%, -50%) rotateY(180deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+}
+
+.fs-header {
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fs-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.back-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.3s;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.fs-inner.flip-back {
+  animation: flipOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes flipOut {
+  0% {
+    transform: translate(-50%, -50%) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotateY(90deg) scale(0.7);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateY(180deg) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.clips {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 8px;
+}
