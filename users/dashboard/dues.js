@@ -191,13 +191,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentStream = null;
   let isFlashOn = false;
 
-  btnScan.addEventListener("click", async () => {
+ btnScan.addEventListener("click", async () => {
     cameraOverlay.classList.remove("hidden");
-    btnToggleFlash.style.display = "none"; // Hide initially
+    // We keep it visible now for testing, but dim it if not supported
+    btnToggleFlash.style.opacity = "0.5"; 
     isFlashOn = false;
 
     try {
-      // 1. Get all cameras and pick the back one (environment)
       const videoDevices = await codeReader.listVideoInputDevices();
       const backCamera = videoDevices.find(device => 
         device.label.toLowerCase().includes('back') || 
@@ -206,87 +206,54 @@ document.addEventListener("DOMContentLoaded", () => {
       
       selectedDeviceId = backCamera ? backCamera.deviceId : videoDevices[0].deviceId;
 
-      // 2. Define High-Performance Constraints
       const constraints = {
         video: {
           deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
           facingMode: "environment",
-          width: { ideal: 1280 }, // 720p is often faster/more reliable than 1080p for decoding
+          width: { ideal: 1280 }, 
           height: { ideal: 720 },
-          // Focus and Torch are "advanced" constraints
-          advanced: [
-            { focusMode: "continuous" },
-            { torch: false }
-          ]
+          // Focus is key for small QR codes
+          advanced: [{ focusMode: "continuous" }] 
         }
       };
 
-      // 3. Start Decoding
-      codeReader.decodeFromConstraints(constraints, 'video', (result, err) => {
+      await codeReader.decodeFromConstraints(constraints, 'video', (result, err) => {
         if (result) {
           idInput.value = result.getText();
           idInput.dispatchEvent(new Event('input')); 
-          
           playSuccessFeedback();
           showToast("QR Scanned Successfully", "success", 5000);
           stopScanner();
         }
       });
 
-      // 4. WAIT for the stream to be active before checking for Flash
-      // This solves the "Flash not showing on load" issue
-      setTimeout(async () => {
-        try {
-          // Access the active track from the video element
-          const videoTrack = videoEl.srcObject?.getVideoTracks()[0];
-          if (videoTrack) {
-            currentStream = videoEl.srcObject;
-            const caps = videoTrack.getCapabilities();
-            
-            // Check if torch (flash) is actually supported
-            if (caps && caps.torch) {
-              btnToggleFlash.style.display = "block";
-              btnToggleFlash.innerText = "🔦 Flash: OFF";
-            }
+      // --- FLASH & FOCUS INITIALIZATION ---
+      // We check multiple times because hardware takes a moment to respond
+      const checkCapabilities = setInterval(() => {
+        const track = videoEl.srcObject?.getVideoTracks()[0];
+        if (track) {
+          const caps = track.getCapabilities();
+          
+          // If the device supports flash, highlight the button
+          if (caps && caps.torch) {
+            btnToggleFlash.style.opacity = "1";
+            btnToggleFlash.style.display = "block";
+            clearInterval(checkCapabilities);
           }
-        } catch (e) {
-          console.warn("Flash check failed:", e);
+          
+          // Try to force the focus to be as sharp as possible
+          if (caps && caps.focusMode?.includes('continuous')) {
+             track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
+          }
         }
-      }, 1000); // 1 second delay gives the hardware time to "wake up"
+      }, 500);
+
+      // Stop checking after 5 seconds to save battery
+      setTimeout(() => clearInterval(checkCapabilities), 5000);
 
     } catch (err) {
       console.error("Camera Error:", err);
-      showToast("Could not start camera. Please check permissions.", "error");
+      showToast("Camera Error: " + err.message, "error");
       stopScanner();
     }
   });
-
-  // Flashlight Toggle Logic
-  btnToggleFlash.addEventListener("click", async () => {
-    const track = videoEl.srcObject?.getVideoTracks()[0];
-    if (track) {
-      try {
-        isFlashOn = !isFlashOn;
-        await track.applyConstraints({
-          advanced: [{ torch: isFlashOn }]
-        });
-        
-        btnToggleFlash.innerText = isFlashOn ? "🔦 Flash: ON" : "🔦 Flash: OFF";
-        btnToggleFlash.style.backgroundColor = isFlashOn ? "#27ae60" : "#333";
-      } catch (err) {
-        showToast("Flash not supported on this browser/device", "error");
-      }
-    }
-  });
-
-  function stopScanner() {
-    codeReader.reset();
-    if (videoEl.srcObject) {
-      videoEl.srcObject.getTracks().forEach(track => track.stop());
-    }
-    videoEl.srcObject = null;
-    cameraOverlay.classList.add("hidden");
-  }
-
-  document.getElementById("btnCloseCamera").addEventListener("click", stopScanner);
-});
