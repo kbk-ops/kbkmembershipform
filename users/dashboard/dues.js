@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const form = document.getElementById("duesForm");
   const idInput = document.getElementById("id_number");
   const nameInput = document.getElementById("full_name");
@@ -27,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } = await window.supabaseClient.auth.getUser();
       if (!user) return;
 
+      // 1. Get id_number from user_roles
       const { data: roleData } = await window.supabaseClient
         .from("user_roles")
         .select("id_number")
@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .single();
 
       if (roleData?.id_number) {
+        // 2. Get profile details from members_data
         const { data: profile } = await window.supabaseClient
           .from("members_data")
           .select("first_name, last_name, suffix")
@@ -83,12 +84,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 500);
   });
 
-  // --- FORM SUBMISSION VALIDATION ---
+  // --- FORM SUBMISSION ---
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // 2. Validation Check: Do not allow submit if Name, Barangay, or District are blank
     if (!nameInput.value || !barangayInput.value || !districtInput.value) {
-      showToast("Member details missing. Please enter a valid ID Number first.", "error");
+      showToast(
+        "Member details missing. Please enter a valid ID Number first.",
+        "error"
+      );
       return;
     }
 
@@ -109,14 +114,13 @@ document.addEventListener("DOMContentLoaded", () => {
       .from("contributions")
       .insert([payload]);
 
-    toggleLoading(true);
+    toggleLoading(false);
 
     if (error) {
       showToast(error.message, "error");
-      toggleLoading(false);
     } else {
-      showToast(`Dues Recorded for ${payload.month}!`, "success", 5000); // 5 Seconds Success
-      toggleLoading(false);
+      // 3. Put 5 seconds on success message
+      showToast(`Dues Recorded for ${payload.month}!`, "success", 5000);
       resetForm();
     }
   });
@@ -139,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Array.from(form.elements).forEach((i) => (i.disabled = show));
   }
 
+  // Modified to accept a duration (defaults to 3000ms if not provided)
   function showToast(msg, type, duration = 3000) {
     const t = document.createElement("div");
     t.className = `toast ${type}`;
@@ -147,11 +152,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => t.remove(), duration);
   }
 
+  // 4. Add vibrate and sound on successful scan
   function playSuccessFeedback() {
+    // Vibrate phone for 200ms (if supported by device)
     if (navigator.vibrate) {
-      navigator.vibrate(200); // Vibrate
+      navigator.vibrate(200);
     }
 
+    // Play a short beep using Web Audio API
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
@@ -161,25 +169,26 @@ document.addEventListener("DOMContentLoaded", () => {
       gainNode.connect(audioCtx.destination);
 
       oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Pitch (A5)
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volume
 
       oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.15); // Beep Sound
+      oscillator.stop(audioCtx.currentTime + 0.15); // Duration: 150ms
     } catch (e) {
-      console.log("Audio feedback not supported.");
+      console.log("Audio feedback not supported in this browser.");
     }
   }
 
   btnClear.addEventListener("click", resetForm);
 
-  // --- 🛠️ UPDATED HIGH-RES SCANNER LOGIC ---
+  // --- ZXING QR SCANNER LOGIC (Updated for High-Res, Flash & Guide) ---
   const videoEl = document.getElementById("video");
   const btnToggleFlash = document.getElementById("btnToggleFlash");
   const cameraOverlay = document.getElementById("cameraOverlay");
   
   let codeReader = new ZXing.BrowserMultiFormatReader();
-  let localStream = null;
+  let selectedDeviceId = null;
+  let currentStream = null;
   let isFlashOn = false;
 
   btnScan.addEventListener("click", async () => {
@@ -188,71 +197,73 @@ document.addEventListener("DOMContentLoaded", () => {
     isFlashOn = false;
 
     try {
-      // Find the back/environment camera
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      const backCamera = videoDevices.find(d => 
-        d.label.toLowerCase().includes('back') || 
-        d.label.toLowerCase().includes('environment')
+      // 1. Get all cameras and pick the back one (environment)
+      const videoDevices = await codeReader.listVideoInputDevices();
+      const backCamera = videoDevices.find(device => 
+        device.label.toLowerCase().includes('back') || 
+        device.label.toLowerCase().includes('environment')
       );
       
+      selectedDeviceId = backCamera ? backCamera.deviceId : videoDevices[0].deviceId;
+
+      // 2. Define High-Performance Constraints
       const constraints = {
         video: {
-          deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
+          deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
           facingMode: "environment",
-          width: { ideal: 1280 }, // 720p captures details without processing lag
-          height: { ideal: 720 }
+          width: { ideal: 1280 }, // 720p is often faster/more reliable than 1080p for decoding
+          height: { ideal: 720 },
+          // Focus and Torch are "advanced" constraints
+          advanced: [
+            { focusMode: "continuous" },
+            { torch: false }
+          ]
         }
       };
 
-      // 1. Manually capture stream so we can bind it and read capabilities
-      localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoEl.srcObject = localStream;
-      videoEl.setAttribute("playsinline", "true"); 
-      await videoEl.play();
-
-      // 2. Read flashlight (Torch) capabilities from live track
-      const track = localStream.getVideoTracks()[0];
-      if (track && track.getCapabilities) {
-        const capabilities = track.getCapabilities();
-        if (capabilities.torch) {
-          btnToggleFlash.style.display = "block";
-          btnToggleFlash.innerText = "🔦 Flash: OFF";
-          btnToggleFlash.style.backgroundColor = "#333";
-        }
-      }
-
-      // 3. Set Continuous Focus if possible
-      if (track && track.applyConstraints) {
-        track.applyConstraints({
-          advanced: [{ focusMode: "continuous" }]
-        }).catch(() => {}); 
-      }
-
-      // 4. Pass existing stream to ZXing to decode
-      codeReader.decodeFromVideoElement(videoEl, (result, err) => {
+      // 3. Start Decoding
+      codeReader.decodeFromConstraints(constraints, 'video', (result, err) => {
         if (result) {
           idInput.value = result.getText();
-          idInput.dispatchEvent(new Event("input"));
-
-          playSuccessFeedback(); 
-          showToast("QR Scanned Successfully", "success", 5000); 
+          idInput.dispatchEvent(new Event('input')); 
+          
+          playSuccessFeedback();
+          showToast("QR Scanned Successfully", "success", 5000);
           stopScanner();
         }
       });
 
+      // 4. WAIT for the stream to be active before checking for Flash
+      // This solves the "Flash not showing on load" issue
+      setTimeout(async () => {
+        try {
+          // Access the active track from the video element
+          const videoTrack = videoEl.srcObject?.getVideoTracks()[0];
+          if (videoTrack) {
+            currentStream = videoEl.srcObject;
+            const caps = videoTrack.getCapabilities();
+            
+            // Check if torch (flash) is actually supported
+            if (caps && caps.torch) {
+              btnToggleFlash.style.display = "block";
+              btnToggleFlash.innerText = "🔦 Flash: OFF";
+            }
+          }
+        } catch (e) {
+          console.warn("Flash check failed:", e);
+        }
+      }, 1000); // 1 second delay gives the hardware time to "wake up"
+
     } catch (err) {
-      console.error("Camera access failed:", err);
-      showToast("Camera Error: " + err.message, "error");
+      console.error("Camera Error:", err);
+      showToast("Could not start camera. Please check permissions.", "error");
       stopScanner();
     }
   });
 
   // Flashlight Toggle Logic
   btnToggleFlash.addEventListener("click", async () => {
-    if (!localStream) return;
-    const track = localStream.getVideoTracks()[0];
-    
+    const track = videoEl.srcObject?.getVideoTracks()[0];
     if (track) {
       try {
         isFlashOn = !isFlashOn;
@@ -261,20 +272,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         
         btnToggleFlash.innerText = isFlashOn ? "🔦 Flash: ON" : "🔦 Flash: OFF";
-        btnToggleFlash.style.backgroundColor = isFlashOn ? "#27ae60" : "#333"; 
+        btnToggleFlash.style.backgroundColor = isFlashOn ? "#27ae60" : "#333";
       } catch (err) {
-        showToast("Flash toggle failed.", "error");
+        showToast("Flash not supported on this browser/device", "error");
       }
     }
   });
 
   function stopScanner() {
-    if (codeReader) {
-      codeReader.reset();
-    }
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      localStream = null;
+    codeReader.reset();
+    if (videoEl.srcObject) {
+      videoEl.srcObject.getTracks().forEach(track => track.stop());
     }
     videoEl.srcObject = null;
     cameraOverlay.classList.add("hidden");
