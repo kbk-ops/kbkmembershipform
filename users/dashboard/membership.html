@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Dashboard</title>	
+	<link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+	<link rel="stylesheet" href="member.css">
+	<link rel="stylesheet" href="topbottom.css">
+	
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script> 
+</head>
+<body>
+    <main class="dashboard-container">
+        
+        <section class="filters-section glass-panel">
+            <div id="filter-search-container" class="filter-row-1">
+                </div>
+            <div id="filter-dropdowns-container" class="filter-row-2">
+                </div>
+            <div class="filter-actions">
+                <button id="btn-generate" class="action-btn btn-green">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Generate
+                </button>
+                <button id="btn-download" class="action-btn btn-violet">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download PDF
+                </button>
+            </div>
+        </section>
+
+        <section class="kpi-grid">
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">Total Members</span>
+                    <svg class="kpi-icon text-violet" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <h2 id="kpi-total" class="kpi-value">0</h2>
+            </div>
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">New (60 Days)</span>
+                    <svg class="kpi-icon text-green" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                </div>
+                <h2 id="kpi-new" class="kpi-value">0</h2>
+            </div>
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">Good Standing</span>
+                    <svg class="kpi-icon text-green" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 id="kpi-good" class="kpi-value">0</h2>
+            </div>
+            <div class="kpi-card glass-panel delinquent-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Delinquent</span>
+                    <svg class="kpi-icon text-red" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 id="kpi-delinquent" class="kpi-value">0</h2>
+            </div>
+        </section>
+
+        <section class="charts-grid">
+            <div class="chart-container glass-panel">
+                <h3>Age Distribution</h3>
+                <canvas id="ageChart"></canvas>
+            </div>
+            <div class="chart-container glass-panel">
+                <h3>Gender Distribution</h3>
+                <canvas id="genderChart"></canvas>
+            </div>
+        </section>
+
+        <section class="data-section glass-panel">
+            <div class="data-header">
+                <h3>Member Directory</h3>
+                
+                <div class="toggle-container">
+                    <span class="toggle-label">Cards</span>
+                    <label class="switch">
+                        <input type="checkbox" id="view-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Table</span>
+                </div>
+            </div>
+
+            <div class="data-scroll-area" id="data-scroll-area">
+                
+                <div id="loader" class="loader-hidden">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+
+                <div id="card-view" class="view-active member-cards-grid">
+                    </div>
+
+                <div id="table-view" class="view-hidden">
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="id_number">ID Number ↕</th>
+                                <th data-sort="first_name">Full Name ↕</th>
+                                <th data-sort="address">Address ↕</th>
+                                <th data-sort="phone_number">Phone ↕</th>
+                                <th data-sort="barangay">Barangay ↕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination-controls">
+                </div>
+        </section>
+    </main>
+
+	<script src="supabaseClient.js"></script>
+	<script src="authGuard.js"></script>
+	<script src="components.js"></script>
+    <script src="member.js"></script>
+</body>
+</html>
