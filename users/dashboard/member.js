@@ -1,395 +1,437 @@
-const supabaseClient = window.supabaseClient;
+// Register ChartDataLabels plugin
+Chart.register(ChartDataLabels);
 
-if (!supabaseClient) {
-    console.error("Supabase client not initialized.");
-}
+let globalMembers = [];
+let globalContributions = new Set();
+let filteredData = [];
+let currentUserRole = null;
+let currentProfile = null;
+let currentPage = 1;
+const ROWS_PER_PAGE = 100;
+let currentSort = { column: 'first_name', asc: true };
 
-// State Management
-let state = {
-    user: null,
-    role: null,
-    userInfo: null, 
-    allMembers: [],
-    contributions: new Set(),
-    filteredData: [],
-    currentPage: 1,
-    itemsPerPage: 100,
-    currentSort: { column: null, asc: true },
-    charts: { age: null, gender: null },
-    filters: { search: '', barangay: '', district: '' },
-    isGenerated: false
+// Custom Plugin to draw SVG Icons inside Pie Chart
+const pieIconPlugin = {
+    id: 'pieIcons',
+    afterDraw: (chart) => {
+        if (chart.config.type !== 'pie') return;
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            meta.data.forEach((element, index) => {
+                const label = chart.data.labels[index];
+                // Simplified SVG paths encoded for Image source
+                const maleSVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M15 4v2h3.59l-4.07 4.07c-1.2-1.3-2.9-2.07-4.52-2.07C6.69 8 4 10.69 4 14s2.69 6 6 6 6-2.69 6-6c0-1.62-.77-3.32-2.07-4.52L18 5.41V9h2V4h-5zm-5 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>';
+                const femaleSVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M12 4c-3.31 0-6 2.69-6 6 0 2.97 2.16 5.43 5 5.91V19H9v2h2v2h2v-2h2v-2h-2v-3.09c2.84-.48 5-2.94 5-5.91 0-3.31-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>';
+                
+                const img = new Image();
+                img.src = label === 'Male' ? maleSVG : femaleSVG;
+                
+                const position = element.tooltipPosition();
+                // Draw image slightly offset to accommodate the percentage text
+                ctx.drawImage(img, position.x - 12, position.y + 5, 24, 24);
+            });
+        });
+    }
 };
+Chart.register(pieIconPlugin);
 
-// SVG Fallback for Avatar
-const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
-
-document.addEventListener("DOMContentLoaded", async () => {
-    // Top/Bottom Nav integration guard
-    if (window.initAuthGuard) await window.initAuthGuard();
-    
-    await initializeApp();
+document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
+    await initializeApp();
 });
 
 async function initializeApp() {
-    toggleLoader(true); // Show skeleton loading
+    const user = await getUser(); // From components.js / supabaseClient.js
+    if (!user) return; // Handle unauth if needed
 
-    // 1. Get User
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-        toggleLoader(false);
-        return;
-    }
-    state.user = user;
-
-    // 2. Get User Role
-    const { data: roleData } = await supabaseClient
+    // 1. Fetch user role
+    const { data: roleData } = await window.supabaseClient
         .from('user_roles')
-        .select('role, id_number')
+        .select('*')
         .eq('auth_user_id', user.id)
-        .maybeSingle();
-
-    state.role = roleData?.role || 'brgy_moderator';
-
-    // 3. Get User Info
-    if (roleData?.id_number) {
-        const { data } = await supabaseClient
-            .from('members_data')
-            .select('first_name, last_name')
-            .eq('id_number', roleData.id_number)
-            .maybeSingle();
-        state.userInfo = data || { first_name: 'Admin', last_name: 'User' };
-    } else {
-        state.userInfo = { first_name: 'Admin', last_name: 'User' };
-    }
-
-    // 4. Setup UI and Data
-    renderFilters();
-    await fetchAllData();
-
-    // 5. Initial Load (Triggers KPI and Charts immediately)
-    handleGenerate(); 
+        .single();
     
-    toggleLoader(false); // Hide loader once data is ready
+    currentUserRole = roleData?.role || 'brgy_moderator';
+    currentProfile = roleData;
+
+    // 2. Fetch Data for KPIs and Charts (Non-blocking UI)
+    fetchDashboardData();
 }
 
-function toggleLoader(show) {
-    const loader = document.getElementById('loader');
-    const cardView = document.getElementById('card-view');
-    if (!loader || !cardView) return;
+async function fetchDashboardData() {
+    // Fetch members and contributions in parallel
+    const [membersRes, contributionsRes] = await Promise.all([
+        window.supabaseClient.from('members_data').select('*'),
+        window.supabaseClient.from('contributions').select('id_number')
+    ]);
 
-    if (show) {
-        loader.classList.remove('loader-hidden');
-        cardView.classList.add('view-hidden');
-    } else {
-        loader.classList.add('loader-hidden');
-        cardView.classList.remove('view-hidden');
-    }
+    globalMembers = membersRes.data || [];
+    const contribs = contributionsRes.data || [];
+    globalContributions = new Set(contribs.map(c => c.id_number));
+
+    renderKPIs();
+    renderCharts();
+    setupFilters();
 }
 
-function renderFilters() {
-    const searchContainer = document.getElementById('filter-search-container');
-    const dropsContainer = document.getElementById('filter-dropdowns-container');
-    
-    searchContainer.innerHTML = `<input type="text" id="input-search" placeholder="Search ID, Name..." aria-label="Search members">`;
+// --- KPI Logic ---
+function renderKPIs() {
+    const now = new Date();
+    const sixtyDaysAgo = new Date(now.setDate(now.getDate() - 60));
 
-    let dropsHtml = '';
-    if (state.role === 'brgy_moderator' || state.role === 'brgy_admin') {
-        const userBrgy = "Sample Barangay"; 
-        dropsHtml = `<input type="text" id="input-brgy" value="${userBrgy}" readonly title="Locked to your Barangay">`;
-    } else {
-        dropsHtml = `
-            <select id="input-brgy"><option value="">All Barangays</option></select>
-            <select id="input-dist"><option value="">All Districts</option></select>
-        `;
-    }
-    dropsContainer.innerHTML = dropsHtml;
-}
+    const totalMembers = globalMembers.length;
+    const newMembers = globalMembers.filter(m => new Date(m.created_at) >= sixtyDaysAgo).length;
+    const goodStanding = [...globalContributions].length; // Unique ID count
+    const inactive = globalMembers.filter(m => !globalContributions.has(m.id_number)).length;
 
-async function fetchAllData() {
-    try {
-        const { data: members } = await supabaseClient.from('members_data').select('*');
-        state.allMembers = members || [];
+    const kpiData = [
+        { title: "Total Members", value: totalMembers, icon: '<path d="M12 14c-4.418 0-8 3.582-8 8h16c0-4.418-3.582-8-8-8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6z"/>' },
+        { title: "New Members (60d)", value: newMembers, icon: '<path d="M12 4v16m8-8H4"/>' },
+        { title: "Good Standing", value: goodStanding, icon: '<path d="M5 13l4 4L19 7"/>' },
+        { title: "Inactive Members", value: inactive, icon: '<path d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/>' }
+    ];
 
-        const { data: contribs } = await supabaseClient.from('contributions').select('id_number');
-        state.contributions = new Set(contribs?.map(c => c.id_number) || []);
+    const container = document.getElementById('kpi-container');
+    container.innerHTML = kpiData.map(kpi => `
+        <div class="kpi-card">
+            <svg class="kpi-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                ${kpi.icon}
+            </svg>
+            <h3 class="kpi-title">${kpi.title}</h3>
+            <p class="kpi-value" data-val="${kpi.value}">0</p>
+        </div>
+    `).join('');
 
-        populateDropdowns();
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    }
-}
-
-function populateDropdowns() {
-    const brgySelect = document.getElementById('input-brgy');
-    const distSelect = document.getElementById('input-dist');
-
-    if (brgySelect && brgySelect.tagName === 'SELECT') {
-        const brgys = [...new Set(state.allMembers.map(m => m.barangay).filter(Boolean))].sort();
-        brgySelect.innerHTML = '<option value="">All Barangays</option>' + brgys.map(b => `<option value="${b}">${b}</option>`).join('');
-    }
-    if (distSelect && distSelect.tagName === 'SELECT') {
-        const dists = [...new Set(state.allMembers.map(m => m.district).filter(Boolean))].sort();
-        distSelect.innerHTML = '<option value="">All Districts</option>' + dists.map(d => `<option value="${d}">${d}</option>`).join('');
-    }
-}
-
-function setupEventListeners() {
-    document.getElementById('btn-generate').addEventListener('click', handleGenerate);
-    document.getElementById('btn-download').addEventListener('click', generatePDF);
-    document.getElementById('view-toggle').addEventListener('change', toggleView);
-    
-    const searchInput = document.getElementById('input-search');
-    let timeout;
-    searchInput.addEventListener('input', (e) => {
-        clearTimeout(timeout);
-        state.filters.search = e.target.value.toLowerCase();
-        timeout = setTimeout(() => { if (state.isGenerated) applyFiltersAndRender(); }, 300);
-    });
-
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.addEventListener('click', () => {
-            const column = th.dataset.sort;
-            state.currentSort.asc = state.currentSort.column === column ? !state.currentSort.asc : true;
-            state.currentSort.column = column;
-            applyFiltersAndRender();
-        });
+    // Animate count up
+    document.querySelectorAll('.kpi-value').forEach(el => {
+        const target = +el.getAttribute('data-val');
+        let count = 0;
+        const inc = target / 50; // 50 frames
+        const updateCount = () => {
+            count += inc;
+            if (count < target) {
+                el.innerText = Math.ceil(count);
+                requestAnimationFrame(updateCount);
+            } else {
+                el.innerText = target;
+            }
+        };
+        updateCount();
     });
 }
 
-function handleGenerate() {
-    state.isGenerated = true;
-    const brgyInput = document.getElementById('input-brgy');
-    const distInput = document.getElementById('input-dist');
+// --- Chart Logic ---
+function calculateAgeGroups() {
+    const groups = { 'Youth (15-25)': 0, 'Young Adult (26-35)': 0, 'Adult (36-59)': 0, 'Senior Citizen (60+)': 0 };
+    const currentYear = new Date().getFullYear();
+
+    globalMembers.forEach(m => {
+        if (!m.birth_date) return;
+        const age = currentYear - new Date(m.birth_date).getFullYear();
+        if (age >= 15 && age <= 25) groups['Youth (15-25)']++;
+        else if (age >= 26 && age <= 35) groups['Young Adult (26-35)']++;
+        else if (age >= 36 && age <= 59) groups['Adult (36-59)']++;
+        else if (age >= 60) groups['Senior Citizen (60+)']++;
+    });
+    return groups;
+}
+
+function renderCharts() {
+    // Age Chart
+    const ageData = calculateAgeGroups();
+    const totalAge = Object.values(ageData).reduce((a, b) => a + b, 0);
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
     
-    state.filters.barangay = brgyInput ? brgyInput.value : '';
-    state.filters.district = distInput ? distInput.value : '';
-
-    applyFiltersAndRender();
-}
-
-function applyFiltersAndRender() {
-    const { search, barangay, district } = state.filters;
-    
-    state.filteredData = state.allMembers.filter(m => {
-        const matchSearch = !search || 
-            (m.id_number?.toLowerCase().includes(search) || 
-             m.first_name?.toLowerCase().includes(search) || 
-             m.last_name?.toLowerCase().includes(search));
-        const matchBrgy = !barangay || m.barangay === barangay;
-        const matchDist = !district || m.district === district;
-        return matchSearch && matchBrgy && matchDist;
-    });
-
-    if (state.currentSort.column) {
-        state.filteredData.sort((a, b) => {
-            let valA = a[state.currentSort.column] || '';
-            let valB = b[state.currentSort.column] || '';
-            if (valA < valB) return state.currentSort.asc ? -1 : 1;
-            if (valA > valB) return state.currentSort.asc ? 1 : -1;
-            return 0;
-        });
-    }
-
-    state.currentPage = 1;
-    updateKPIs();
-    updateCharts();
-    renderDataViews();
-}
-
-function calculateAge(birthDate) {
-    if (!birthDate) return 0;
-    const diff = Date.now() - new Date(birthDate).getTime();
-    return Math.abs(new Date(diff).getUTCFullYear() - 1970);
-}
-
-function animateValue(id, start, end, duration) {
-    const obj = document.getElementById(id);
-    if (!obj) return;
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
-        if (progress < 1) window.requestAnimationFrame(step);
-    };
-    window.requestAnimationFrame(step);
-}
-
-function updateKPIs() {
-    const total = state.filteredData.length;
-    const sixtyDaysAgo = new Date();
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-    const newMembers = state.filteredData.filter(m => new Date(m.created_at) >= sixtyDaysAgo).length;
-
-    let goodStanding = 0;
-    let delinquent = 0;
-    state.filteredData.forEach(m => {
-        if (state.contributions.has(m.id_number)) goodStanding++;
-        else delinquent++;
-    });
-
-    animateValue('kpi-total', 0, total, 800);
-    animateValue('kpi-new', 0, newMembers, 800);
-    animateValue('kpi-good', 0, goodStanding, 800);
-    animateValue('kpi-delinquent', 0, delinquent, 800);
-}
-
-function updateCharts() {
-    const data = state.allMembers;
-    const total = data.length || 1;
-
-    const ageCounts = { teen: 0, young: 0, adult: 0, senior: 0 };
-    const genderCounts = { male: 0, female: 0, other: 0 };
-
-    data.forEach(m => {
-        const age = calculateAge(m.birth_date);
-        if (age >= 15 && age <= 17) ageCounts.teen++;
-        else if (age >= 18 && age <= 35) ageCounts.young++;
-        else if (age >= 36 && age <= 55) ageCounts.adult++;
-        else if (age >= 56) ageCounts.senior++;
-
-        const g = (m.gender || '').toLowerCase();
-        if (g === 'male') genderCounts.male++;
-        else if (g === 'female') genderCounts.female++;
-        else genderCounts.other++;
-    });
-
-    new Chart(document.getElementById('ageChart'), {
+    new Chart(ageCtx, {
         type: 'bar',
         data: {
-            labels: ['Teen', 'Young', 'Adult', 'Senior'],
-            datasets: [{ data: Object.values(ageCounts), backgroundColor: '#8b5cf6', borderRadius: 5 }]
+            labels: Object.keys(ageData),
+            datasets: [{
+                label: 'Members',
+                data: Object.values(ageData),
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderRadius: 4
+            }]
         },
         options: {
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                datalabels: { color: '#fff', anchor: 'end', align: 'top', formatter: (v) => ((v/total)*100).toFixed(1)+'%' }
+                datalabels: {
+                    color: '#fff',
+                    formatter: (value) => ((value / totalAge) * 100).toFixed(1) + '%'
+                },
+                tooltip: {
+                    callbacks: { label: (ctx) => `${ctx.raw} (${((ctx.raw / totalAge) * 100).toFixed(1)}%)` }
+                }
             },
-            scales: { y: { display: false }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } }
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { grid: { display: false } } }
         }
     });
 
-    new Chart(document.getElementById('genderChart'), {
+    // Gender Chart
+    const genderData = { Male: 0, Female: 0 };
+    globalMembers.forEach(m => { if (m.gender === 'Male' || m.gender === 'Female') genderData[m.gender]++; });
+    const totalGender = genderData.Male + genderData.Female;
+    
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    new Chart(genderCtx, {
         type: 'pie',
         data: {
-            labels: ['Male', 'Female', 'Other'],
-            datasets: [{ data: Object.values(genderCounts), backgroundColor: ['#3b82f6', '#ec4899', '#64748b'], borderWidth: 0 }]
+            labels: ['Male', 'Female'],
+            datasets: [{
+                data: [genderData.Male, genderData.Female],
+                backgroundColor: ['#3b82f6', '#ec4899'],
+                borderWidth: 0
+            }]
         },
         options: {
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'bottom', labels: { color: '#94a3b8' } },
+                legend: { position: 'right', labels: { color: '#fff' } },
                 datalabels: {
-                    color: '#fff', font: { weight: 'bold' },
-                    formatter: (val, ctx) => {
-                        const label = ctx.chart.data.labels[ctx.dataIndex];
-                        const icon = label === 'Male' ? '♂' : label === 'Female' ? '♀' : '⚥';
-                        return `${icon} ${((val/total)*100).toFixed(0)}%`;
-                    }
+                    color: '#fff',
+                    font: { weight: 'bold', size: 14 },
+                    anchor: 'center', align: 'center', offset: -10,
+                    formatter: (value) => ((value / totalGender) * 100).toFixed(1) + '%'
                 }
             }
         }
     });
 }
 
-function formatFullName(m) {
-    let mInitial = (m.middle_name && !['none', 'n/a'].includes(m.middle_name.toLowerCase())) ? ` ${m.middle_name.charAt(0)}.` : '';
-    let sfx = m.suffix ? ` ${m.suffix}` : '';
-    return `${m.first_name}${mInitial} ${m.last_name}${sfx}`.trim();
+// --- Filters & UI Logic ---
+function setupFilters() {
+    const container = document.getElementById('filters-container');
+    const uniqueBarangays = [...new Set(globalMembers.map(m => m.barangay).filter(Boolean))];
+    const uniqueDistricts = [...new Set(globalMembers.map(m => m.district).filter(Boolean))];
+
+    let filterHTML = '';
+    let colsClass = 'cols-2';
+
+    if (['brgy_moderator', 'brgy_admin'].includes(currentUserRole)) {
+        filterHTML += `<div class="input-group"><input type="text" id="filterBarangay" value="${currentProfile.barangay || ''}" readonly></div>`;
+        colsClass = 'cols-2';
+    } else if (currentUserRole === 'dist_admin') {
+        filterHTML += `
+            <div class="input-group">
+                <select id="filterBarangay">
+                    <option value="">All Barangays</option>
+                    ${uniqueBarangays.map(b => `<option value="${b}">${b}</option>`).join('')}
+                </select>
+            </div>
+            <div class="input-group"><input type="text" id="filterDistrict" value="${currentProfile.district || ''}" readonly></div>`;
+        colsClass = 'cols-3';
+    } else {
+        filterHTML += `
+            <div class="input-group">
+                <select id="filterBarangay">
+                    <option value="">All Barangays</option>
+                    ${uniqueBarangays.map(b => `<option value="${b}">${b}</option>`).join('')}
+                </select>
+            </div>
+            <div class="input-group">
+                <select id="filterDistrict">
+                    <option value="">All Districts</option>
+                    ${uniqueDistricts.map(d => `<option value="${d}">${d}</option>`).join('')}
+                </select>
+            </div>`;
+        colsClass = 'cols-3';
+    }
+
+    // Insert after search input
+    document.getElementById('searchInput').parentElement.insertAdjacentHTML('afterend', filterHTML);
+    container.classList.add(colsClass);
+}
+
+function setupEventListeners() {
+    const debounce = (fn, delay) => {
+        let timeout;
+        return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => fn(...args), delay); };
+    };
+
+    document.getElementById('searchInput').addEventListener('input', debounce(() => {
+        if (filteredData.length > 0) applyFilters(); // Live filter if already generated once
+    }, 300));
+
+    document.getElementById('btnGenerate').addEventListener('click', generateDataView);
+    document.getElementById('btnDownload').addEventListener('click', downloadPDF);
+    document.getElementById('viewToggle').addEventListener('change', (e) => {
+        document.getElementById('cardView').classList.toggle('hidden', e.target.checked);
+        document.getElementById('tableView').classList.toggle('hidden', !e.target.checked);
+    });
+
+    // Table Sorting
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.sort;
+            currentSort.asc = currentSort.column === col ? !currentSort.asc : true;
+            currentSort.column = col;
+            applySort();
+            renderDataViews();
+        });
+    });
+}
+
+function getFullName(m) {
+    const mi = m.middle_name && m.middle_name !== 'N/A' && m.middle_name !== 'None' ? `${m.middle_name[0]}. ` : '';
+    const suffix = m.suffix ? ` ${m.suffix}` : '';
+    return `${m.first_name} ${mi}${m.last_name}${suffix}`;
+}
+
+function applyFilters() {
+    const searchVal = document.getElementById('searchInput').value.toLowerCase();
+    const brgyEl = document.getElementById('filterBarangay');
+    const distEl = document.getElementById('filterDistrict');
+
+    filteredData = globalMembers.filter(m => {
+        const matchSearch = searchVal === '' || 
+                            m.id_number?.toLowerCase().includes(searchVal) || 
+                            m.first_name?.toLowerCase().includes(searchVal) || 
+                            m.last_name?.toLowerCase().includes(searchVal);
+        const matchBrgy = !brgyEl || brgyEl.value === '' || m.barangay === brgyEl.value;
+        const matchDist = !distEl || distEl.value === '' || m.district === distEl.value;
+        
+        return matchSearch && matchBrgy && matchDist;
+    });
+
+    applySort();
+    currentPage = 1;
+    renderDataViews();
+}
+
+function applySort() {
+    filteredData.sort((a, b) => {
+        let valA = a[currentSort.column] || '';
+        let valB = b[currentSort.column] || '';
+        if (valA < valB) return currentSort.asc ? -1 : 1;
+        if (valA > valB) return currentSort.asc ? 1 : -1;
+        return 0;
+    });
+}
+
+async function generateDataView() {
+    document.getElementById('dataLoader').classList.remove('hidden');
+    document.getElementById('cardView').classList.add('hidden');
+    document.getElementById('tableView').classList.add('hidden');
+    
+    // Simulate slight delay for UX loading feel since data is in memory
+    await new Promise(r => setTimeout(r, 600)); 
+    
+    applyFilters();
+    document.getElementById('dataLoader').classList.add('hidden');
+    
+    // Show appropriate view based on toggle
+    const isTable = document.getElementById('viewToggle').checked;
+    document.getElementById('cardView').classList.toggle('hidden', isTable);
+    document.getElementById('tableView').classList.toggle('hidden', !isTable);
 }
 
 function renderDataViews() {
-    const cardContainer = document.getElementById('card-view');
-    const tableBody = document.getElementById('table-body');
-    const start = (state.currentPage - 1) * state.itemsPerPage;
-    const paginated = state.filteredData.slice(start, start + state.itemsPerPage);
+    const start = (currentPage - 1) * ROWS_PER_PAGE;
+    const paginated = filteredData.slice(start, start + ROWS_PER_PAGE);
 
-    let cardHTML = '';
-    let tableHTML = '';
+    // 1. Render Cards
+    const cardContainer = document.getElementById('cardView');
+    cardContainer.innerHTML = paginated.map(m => {
+        const age = m.birth_date ? new Date().getFullYear() - new Date(m.birth_date).getFullYear() : 'N/A';
+        const isDelinquent = !globalContributions.has(m.id_number);
+        const img = m.picture || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23fff" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
 
-    paginated.forEach(m => {
-        const isDelinquent = !state.contributions.has(m.id_number);
-        const name = formatFullName(m);
-        const age = calculateAge(m.birth_date);
-        
-        cardHTML += `
+        return `
             <div class="member-card ${isDelinquent ? 'delinquent' : ''}">
-                <img src="${m.picture || fallbackAvatar}" class="avatar" loading="lazy" onerror="this.src='${fallbackAvatar}'">
+                <img src="${img}" alt="Avatar" class="member-avatar" loading="lazy">
                 <div class="member-info">
-                    <h4>${name}</h4>
-                    <p>${m.gender || 'N/A'} • ${age} yrs</p>
+                    <h4>${getFullName(m)}</h4>
+                    <p>ID: ${m.id_number}</p>
+                    <p>${m.gender || 'N/A'} | Age: ${age}</p>
                 </div>
             </div>`;
+    }).join('');
 
-        tableHTML += `
+    // 2. Render Table
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = paginated.map(m => {
+        const isDelinquent = !globalContributions.has(m.id_number);
+        return `
             <tr class="${isDelinquent ? 'delinquent' : ''}">
-                <td>${m.id_number || 'N/A'}</td>
-                <td>${name}</td>
-                <td>${m.address || 'N/A'}</td>
-                <td>${m.phone_number || 'N/A'}</td>
-                <td>${m.barangay || 'N/A'}</td>
+                <td>${m.id_number || ''}</td>
+                <td>${getFullName(m)}</td>
+                <td>${m.address || ''}</td>
+                <td>${m.phone_number || ''}</td>
+                <td>${m.barangay || ''}</td>
             </tr>`;
-    });
+    }).join('');
 
-    cardContainer.innerHTML = cardHTML || '<p>No records found.</p>';
-    tableBody.innerHTML = tableHTML || '<tr><td colspan="5">No records found.</td></tr>';
     renderPagination();
 }
 
-function toggleView() {
-    const isTable = document.getElementById('view-toggle').checked;
-    document.getElementById('card-view').className = isTable ? 'view-hidden' : 'view-active member-cards-grid';
-    document.getElementById('table-view').className = isTable ? 'view-active' : 'view-hidden';
-}
-
 function renderPagination() {
-    const totalPages = Math.ceil(state.filteredData.length / state.itemsPerPage);
-    const pagContainer = document.getElementById('pagination-controls');
-    if (totalPages <= 1) { pagContainer.innerHTML = ''; return; }
+    const totalPages = Math.ceil(filteredData.length / ROWS_PER_PAGE);
+    const container = document.getElementById('pagination');
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
 
-    let html = `<button class="page-btn" ${state.currentPage === 1 ? 'disabled' : ''} onclick="changePage(${state.currentPage - 1})"><</button>`;
-    for (let i = Math.max(1, state.currentPage - 2); i <= Math.min(totalPages, state.currentPage + 2); i++) {
-        html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+    let html = `<button class="page-btn" onclick="changePage(1)">&lt;&lt;</button>`;
+    html += `<button class="page-btn" onclick="changePage(${Math.max(1, currentPage - 1)})">&lt;</button>`;
+    
+    // Simple window for pagination
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
     }
-    html += `<button class="page-btn" ${state.currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${state.currentPage + 1})">></button>`;
-    pagContainer.innerHTML = html;
+
+    html += `<button class="page-btn" onclick="changePage(${Math.min(totalPages, currentPage + 1)})">&gt;</button>`;
+    html += `<button class="page-btn" onclick="changePage(${totalPages})">&gt;&gt;</button>`;
+    
+    container.innerHTML = html;
 }
 
 window.changePage = (page) => {
-    state.currentPage = page;
+    currentPage = page;
     renderDataViews();
-    document.getElementById('data-scroll-area').scrollTop = 0;
 };
 
-function generatePDF() {
-    if (!state.isGenerated || state.filteredData.length === 0) return alert("No data to download.");
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape');
-    const reqBy = `${state.userInfo.first_name} ${state.userInfo.last_name}`;
-    
-    doc.setFontSize(16);
-    doc.text("Membership Report", 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Requested by: ${reqBy} | Date: ${new Date().toLocaleDateString()}`, 14, 28);
+function downloadPDF() {
+    if (filteredData.length === 0) return alert("Please generate data first.");
 
-    const rows = state.filteredData.map(m => [
-        m.id_number || 'N/A',
-        formatFullName(m),
-        m.address || 'N/A',
-        m.phone_number || 'N/A',
-        m.barangay || 'N/A',
-        state.contributions.has(m.id_number) ? 'Good' : 'Delinquent'
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Header Data
+    const reqBy = currentProfile ? getFullName(currentProfile) : 'Admin';
+    const brgyVal = document.getElementById('filterBarangay')?.value || currentProfile?.barangay || 'All';
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+    // Header Drawing
+    doc.setFontSize(16);
+    doc.text("KBKAI Membership Data", 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Requested by: ${reqBy}`, 14, 28);
+    doc.text(`Barangay: ${brgyVal}`, 14, 34);
+    doc.text(`Date Generated: ${dateStr}`, 14, 40);
+
+    // Table Data
+    const tableBody = filteredData.map(m => [
+        m.id_number,
+        getFullName(m),
+        m.address,
+        m.phone_number,
+        m.barangay
     ]);
 
     doc.autoTable({
-        head: [["ID", "Name", "Address", "Phone", "Barangay", "Status"]],
-        body: rows,
-        startY: 35,
+        startY: 45,
+        head: [['ID Number', 'Full Name', 'Address', 'Phone Number', 'Barangay']],
+        body: tableBody,
         theme: 'grid',
-        headStyles: { fillColor: [109, 40, 217] }
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [109, 40, 217] } // Violet header
     });
 
-    doc.save(`Membership_Report.pdf`);
+    doc.save(`KBKAI_Membership_${dateStr}.pdf`);
 }
