@@ -297,7 +297,7 @@ input:read-only {
 
 /* Scrollable container for data */
 .scrollable-container {
-  height: 500px;
+  height: 485px;
   overflow-y: auto;
   padding-right: 0.5rem;
   position: relative;
