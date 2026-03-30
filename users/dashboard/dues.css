@@ -13,6 +13,7 @@ body {
   min-height: 100vh;
   overflow-y: hidden;
   position: relative;
+  visibility: hidden;
 }
 
 .bg-animated {
@@ -69,7 +70,7 @@ body {
   color: #94a3b8;
 }
 
-/* --- Form Layout (2-Column Mobile First) --- */
+/* --- Form Layout --- */
 .form-group {
   display: grid;
   grid-template-columns: 85px 1fr;
@@ -276,19 +277,19 @@ button.btn,
 
 /* --- Camera Modal --- */
 #cameraOverlay video {
-  margin: 0 !important; 
+  margin: 0 !important;
   border: none !important;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Specific styling for the flash toggle button */
+/* Styling for the flash toggle button */
 #btnToggleFlash {
   transition: background-color 0.3s ease, transform 0.1s active;
 }
 
-/* Ensure the camera container scales well on very small screens */
+/* Camera container */
 .camera-container {
   margin: 20px;
   max-height: 90vh;
@@ -297,13 +298,25 @@ button.btn,
   justify-content: center;
 }
 
-/* Modern pulsing effect for the green guide (Optional but looks great) */
+/* Effect for the green guide */
 #cameraOverlay div[style*="border: 3px solid #00FF00"] {
   animation: guide-pulse 2s infinite;
 }
 
 @keyframes guide-pulse {
-  0% { border-color: rgba(0, 255, 0, 1); box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 255, 0, 0.2); }
-  50% { border-color: rgba(0, 255, 0, 0.5); box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 255, 0, 0.4); }
-  100% { border-color: rgba(0, 255, 0, 1); box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 255, 0, 0.2); }
+  0% {
+    border-color: rgba(0, 255, 0, 1);
+    box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6),
+      inset 0 0 10px rgba(0, 255, 0, 0.2);
+  }
+  50% {
+    border-color: rgba(0, 255, 0, 0.5);
+    box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6),
+      inset 0 0 20px rgba(0, 255, 0, 0.4);
+  }
+  100% {
+    border-color: rgba(0, 255, 0, 1);
+    box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6),
+      inset 0 0 10px rgba(0, 255, 0, 0.2);
+  }
 }

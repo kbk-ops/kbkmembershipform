@@ -12,6 +12,7 @@ body {
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
+  visibility: hidden;
 }
 
 /* Gradient Orbs for Glassmorphism Background */
@@ -105,7 +106,7 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   margin: 0 auto;
-  padding: 70px 16px 80px 16px;
+  padding: 75px 16px 90px 16px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   width: 100%;

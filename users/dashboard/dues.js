@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnClear = document.getElementById("btnClear");
   const spinner = document.getElementById("spinnerOverlay");
 
-  let loggedInUserFullName = "System Admin"; // Fallback
+  let loggedInUserFullName = "System Admin";
   let fetchDebounce = null;
 
   // --- INITIALIZATION ---
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .single();
 
       if (roleData?.id_number) {
-        // 2. Get profile details from members_data
+        // 2. Get member details
         const { data: profile } = await window.supabaseClient
           .from("members_data")
           .select("first_name, last_name, suffix")
@@ -119,8 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error) {
       showToast(error.message, "error");
     } else {
-      // 3. Put 5 seconds on success message
-      showToast(`Dues Recorded for ${payload.month}!`, "success", 5000);
+      // 3. Success message
+      showToast(`Dues Recorded for ${payload.month}!`, "success", 4000);
       resetForm();
     }
   });
@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Array.from(form.elements).forEach((i) => (i.disabled = show));
   }
 
-  // Modified to accept a duration (defaults to 3000ms if not provided)
+  // Modified to accept a duration
   function showToast(msg, type, duration = 3000) {
     const t = document.createElement("div");
     t.className = `toast ${type}`;
@@ -152,14 +152,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => t.remove(), duration);
   }
 
-  // 4. Add vibrate and sound on successful scan
+  // 4. vibrate and sound on successful scan
   function playSuccessFeedback() {
-    // Vibrate phone for 200ms (if supported by device)
+    // Vibrate phone for 200ms
     if (navigator.vibrate) {
       navigator.vibrate(200);
     }
 
-    // Play a short beep using Web Audio API
+    // Play a short beep
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
@@ -169,11 +169,11 @@ document.addEventListener("DOMContentLoaded", () => {
       gainNode.connect(audioCtx.destination);
 
       oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Pitch (A5)
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volume
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
 
       oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.15); // Duration: 150ms
+      oscillator.stop(audioCtx.currentTime + 0.15);
     } catch (e) {
       console.log("Audio feedback not supported in this browser.");
     }
@@ -181,11 +181,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnClear.addEventListener("click", resetForm);
 
-  // --- ZXING QR SCANNER LOGIC (Updated for High-Res, Flash & Guide) ---
- const videoEl = document.getElementById("video");
+  // --- ZXING QR SCANNER LOGIC (High-Res & Guide) ---
+  const videoEl = document.getElementById("video");
   const btnToggleFlash = document.getElementById("btnToggleFlash");
   const cameraOverlay = document.getElementById("cameraOverlay");
-  
+
   let codeReader = new ZXing.BrowserMultiFormatReader();
   let selectedDeviceId = null;
   let currentStream = null;
@@ -199,12 +199,15 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       // 1. Get all cameras and pick the back one (environment)
       const videoDevices = await codeReader.listVideoInputDevices();
-      const backCamera = videoDevices.find(device => 
-        device.label.toLowerCase().includes('back') || 
-        device.label.toLowerCase().includes('environment')
+      const backCamera = videoDevices.find(
+        (device) =>
+          device.label.toLowerCase().includes("back") ||
+          device.label.toLowerCase().includes("environment")
       );
-      
-      selectedDeviceId = backCamera ? backCamera.deviceId : videoDevices[0].deviceId;
+
+      selectedDeviceId = backCamera
+        ? backCamera.deviceId
+        : videoDevices[0].deviceId;
 
       // 2. Define High-Performance Constraints
       const constraints = {
@@ -214,19 +217,16 @@ document.addEventListener("DOMContentLoaded", () => {
           width: { ideal: 1280 }, // 720p is often faster/more reliable than 1080p for decoding
           height: { ideal: 720 },
           // Focus and Torch are "advanced" constraints
-          advanced: [
-            { focusMode: "continuous" },
-            { torch: false }
-          ]
+          advanced: [{ focusMode: "continuous" }, { torch: false }]
         }
       };
 
       // 3. Start Decoding
-      codeReader.decodeFromConstraints(constraints, 'video', (result, err) => {
+      codeReader.decodeFromConstraints(constraints, "video", (result, err) => {
         if (result) {
           idInput.value = result.getText();
-          idInput.dispatchEvent(new Event('input')); 
-          
+          idInput.dispatchEvent(new Event("input"));
+
           playSuccessFeedback();
           showToast("QR Scanned Successfully", "success", 5000);
           stopScanner();
@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (videoTrack) {
             currentStream = videoEl.srcObject;
             const caps = videoTrack.getCapabilities();
-            
+
             // Check if torch (flash) is actually supported
             if (caps && caps.torch) {
               btnToggleFlash.style.display = "block";
@@ -253,7 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
           console.warn("Flash check failed:", e);
         }
       }, 1000); // 1 second delay gives the hardware time to "wake up"
-
     } catch (err) {
       console.error("Camera Error:", err);
       showToast("Could not start camera. Please check permissions.", "error");
@@ -270,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await track.applyConstraints({
           advanced: [{ torch: isFlashOn }]
         });
-        
+
         btnToggleFlash.innerText = isFlashOn ? "🔦 Flash: ON" : "🔦 Flash: OFF";
         btnToggleFlash.style.backgroundColor = isFlashOn ? "#27ae60" : "#333";
       } catch (err) {
@@ -282,11 +281,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function stopScanner() {
     codeReader.reset();
     if (videoEl.srcObject) {
-      videoEl.srcObject.getTracks().forEach(track => track.stop());
+      videoEl.srcObject.getTracks().forEach((track) => track.stop());
     }
     videoEl.srcObject = null;
     cameraOverlay.classList.add("hidden");
   }
 
-  document.getElementById("btnCloseCamera").addEventListener("click", stopScanner);
+  document
+    .getElementById("btnCloseCamera")
+    .addEventListener("click", stopScanner);
 });

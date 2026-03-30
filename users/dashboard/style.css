@@ -9,6 +9,7 @@ body {
   color: #f8fafc;
   font-family: "Inter", -apple-system, sans-serif;
   overflow: hidden;
+  visibility: hidden;
 }
 
 #scroll-area {

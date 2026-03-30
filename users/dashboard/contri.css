@@ -11,8 +11,9 @@ body {
   height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 60px 5px 66px 5px;
+  padding: 74px 5px 85px 5px;
   overflow: hidden;
+  visibility: hidden;
 }
 
 .background-gradient {
@@ -115,11 +116,22 @@ option {
 button {
   padding: 10px 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: 15px;
   color: white;
   font-weight: bold;
   cursor: pointer;
   transition: transform 0.2s;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.btn-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 button:hover:not(:disabled) {
@@ -187,7 +199,7 @@ tbody tr:hover {
 tfoot {
   font-weight: bold;
   background: rgba(0, 0, 0, 0.5);
-  position: sticky;
+  position: relative;
   bottom: 5px;
   z-index: 10;
 }

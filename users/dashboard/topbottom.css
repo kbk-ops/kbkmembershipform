@@ -89,3 +89,11 @@
 }
 
 .float-btn:active { transform: scale(0.9); }
+
+.bottom-nav .nav-item.active span {
+    color: #007bff; /* Example: highlight text */
+    font-weight: bold;
+}
+.bottom-nav .nav-item.active svg {
+    stroke: #007bff; /* Highlight icon */
+}

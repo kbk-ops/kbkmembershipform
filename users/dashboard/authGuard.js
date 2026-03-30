@@ -1,6 +1,6 @@
 (function () {
   // ----- CONFIG -----
-  const INACTIVITY_LIMIT = 1800000; // 30 minutes
+  const INACTIVITY_LIMIT = 1800000;
   let inactivityTimer = null;
   let throttleTimer = null;
   let listenersAttached = false;
@@ -17,7 +17,7 @@
   // ----- REDIRECT -----
   function redirectToLogin() {
     // Use absolute pathing to prevent directory traversal issues
-    window.location.replace("/index.html"); 
+    window.location.replace("../index.html");
   }
 
   // ----- LOGOUT -----
@@ -48,7 +48,7 @@
       }
 
       // Show the page ONLY after auth is confirmed (Prevents FOUC)
-      document.body.style.visibility = "visible"; 
+      document.body.style.visibility = "visible";
 
       return data.session;
     } catch (err) {
@@ -69,9 +69,9 @@
   }
 
   function throttledReset() {
-    // Only allow the reset to fire once per second to save performance
-    if (throttleTimer) return;
     
+    if (throttleTimer) return;
+
     throttleTimer = setTimeout(() => {
       resetTimer();
       throttleTimer = null;
@@ -96,7 +96,7 @@
 
     client.auth.onAuthStateChange((event, session) => {
       // If the user logs out in another tab, or token expires, redirect immediately
-      if (event === 'SIGNED_OUT' || !session) {
+      if (event === "SIGNED_OUT" || !session) {
         redirectToLogin();
       }
     });
@@ -125,4 +125,5 @@
 
   // ----- EXPOSE INIT FUNCTION -----
   window.initAuthGuard = init;
+  window.logout = logout;
 })();
