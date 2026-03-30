@@ -297,7 +297,7 @@ input:read-only {
 
 /* Scrollable container for data */
 .scrollable-container {
-  height: 420px;
+  height: 460px;
   overflow-y: auto;
   padding-right: 0.5rem;
   position: relative;
@@ -461,6 +461,7 @@ input:read-only {
 .member-table th {
   background: #0f172a;
   position: sticky;
+  font-size: 0.8rem;
   top: -1px;
   padding: 1rem;
   cursor: pointer;
