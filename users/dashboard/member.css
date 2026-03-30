@@ -472,6 +472,8 @@ input:read-only {
   padding: 1rem;
   border-bottom: 1px solid var(--glass-border);
   font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .member-table tr.delinquent {
