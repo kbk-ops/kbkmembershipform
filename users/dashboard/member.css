@@ -17,8 +17,8 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-main);
-  padding-top: 70px;
-  padding-bottom: 80px;
+  padding-top: 50px;
+  padding-bottom: 60px;
   box-sizing: border-box;
   visibility: hidden;
 }
