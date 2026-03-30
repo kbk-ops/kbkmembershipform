@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us.</title>
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <link rel="stylesheet" href="topbottom.css">
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #121212;
+      color: #f3f4f6;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      transition: all 0.3s ease-in-out;
+      visibility: hidden;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    a {
+      color: #8b5cf6;
+      /* Violet */
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: #10b981;
+      /* Green */
+    }
+
+    /* Container */
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 0;
+    }
+
+    /* === HERO SECTION === */
+    .hero {
+      text-align: center;
+      padding: 6rem 5%;
+      background: radial-gradient(circle at top, #1e1e1e 0%, #121212 70%);
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      color: #10b981;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #f97316;
+      /* Orange */
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .who-we-are {
+      max-width: 800px;
+      margin: 0 auto;
+      color: #d1d5db;
+      font-size: 1.1rem;
+      text-align: justify;
+    }
+
+    .who-we-are p {
+      margin-bottom: 1.5rem;
+    }
+
+    /* === MISSION & VISION === */
+    .mission-vision {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .mv-card {
+      background-color: #1a1a1a;
+      padding: 2.5rem;
+      border-radius: 12px;
+      border: 1px solid #333;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mv-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+    }
+
+    .mission-card::before {
+      background-color: #10b981;
+      /* Green */
+    }
+
+    .vision-card::before {
+      background-color: #ef4444;
+      /* Red */
+    }
+
+    .mv-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .mv-card h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .mission-card h2 {
+      color: #10b981;
+    }
+
+    .vision-card h2 {
+      color: #ef4444;
+    }
+
+    /* === CORE VALUES === */
+    .section-title {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 3rem;
+      color: #f3f4f6;
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .value-card {
+      background-color: #1a1a1a;
+      padding: 2rem;
+      border-radius: 10px;
+      border: 1px solid #2a2a2a;
+      transition: all 0.3s ease;
+    }
+
+    .value-card h3 {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    /* === Alternating Palette for CORE VALUES === */
+    .value-card:nth-child(4n+1) h3 {
+      color: #10b981;
+      /* Green */
+    }
+
+    .value-card:nth-child(4n+2) h3 {
+      color: #8b5cf6;
+      /* Violet */
+    }
+
+    .value-card:nth-child(4n+3) h3 {
+      color: #f97316;
+      /* Orange */
+    }
+
+    .value-card:nth-child(4n+4) h3 {
+      color: #ef4444;
+      /* Red */
+    }
+
+    .value-card:hover {
+      background-color: #222;
+      border-color: #555;
+      transform: scale(1.02);
+    }
+
+    /* === IMPACT STATS === */
+    .impact-section {
+      background-color: #161616;
+      padding: 4rem 0;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .stat-item h4 {
+      font-size: 3rem;
+      color: #10b981;
+      /* Green */
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-item p {
+      font-size: 1.1rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* === TIMELINE === */
+    .timeline {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #333;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 45px;
+      margin-bottom: 3rem;
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 6px;
+      top: 5px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      z-index: 2;
+    }
+
+    /* === Alternating Palette for Timeline Dots === */
+    .timeline-item:nth-child(4n+1) .timeline-dot {
+      background-color: #10b981;
+    }
+
+    .timeline-item:nth-child(4n+2) .timeline-dot {
+      background-color: #8b5cf6;
+    }
+
+    .timeline-item:nth-child(4n+3) .timeline-dot {
+      background-color: #f97316;
+    }
+
+    .timeline-item:nth-child(4n+4) .timeline-dot {
+      background-color: #ef4444;
+    }
+
+    .timeline-content {
+      background-color: #1a1a1a;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+      transition: transform 0.3s ease;
+    }
+
+    .timeline-content:hover {
+      transform: translateX(5px);
+      border-color: #555;
+    }
+
+    .timeline-content h3 {
+      color: #f3f4f6;
+      margin-bottom: 0.5rem;
+    }
+
+    /* === MISSION TODAY & CERTIFICATE === */
+    .mission-today {
+      text-align: center;
+      margin-top: 5rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(249, 115, 22, 0.1));
+      border-radius: 15px;
+      border: 1px solid #333;
+    }
+
+    .mission-today h3 {
+      font-size: 2rem;
+      color: #8b5cf6;
+      margin-bottom: 1rem;
+    }
+
+    .mission-today p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto 2rem auto;
+    }
+
+    .mission-today img {
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin: 0 auto;
+    }
+
+    .certificate-section {
+      text-align: center;
+      margin-top: 5rem;
+      padding: 2rem 0;
+    }
+
+    .certificate-section h3 {
+      font-size: 1.8rem;
+      color: #10b981;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .certificate-section img {
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      max-width: 100%;
+      margin: 0 auto;
+      border: 1px solid #333;
+    }
+
+    /* === CONTACT & FOOTER === */
+    .contact-section {
+      text-align: center;
+      padding: 4rem 0;
+      background-color: #161616;
+      border-top: 1px solid #333;
+    }
+
+    .contact-section h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #f97316;
+      /* Orange */
+    }
+
+    .contact-section p {
+      margin-bottom: 2rem;
+      color: #d1d5db;
+    }
+
+    .btn {
+      background-color: #8b5cf6;
+      /* Violet */
+      color: #ffffff;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn:hover {
+      background-color: #7c3aed;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .contact-info {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.5s ease-in-out;
+      margin-top: 2rem;
+    }
+
+    .contact-info.active {
+      max-height: 200px;
+      opacity: 1;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .contact-links a {
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #1a1a1a;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+      width: 100%;
+      max-width: 300px;
+      justify-content: center;
+    }
+
+    .contact-links a:hover {
+      border-color: #8b5cf6;
+      /* Violet */
+      background-color: #222;
+    }
+
+    footer {
+      background-color: #0a0a0a;
+      padding: 3rem 5%;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    /* === ANIMATIONS === */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* === SCREEN QUERIES === */
+    @media (min-width: 768px) {
+      .hero h1 {
+        font-size: 3.5rem;
+      }
+
+      .mission-vision {
+        flex-direction: row;
+      }
+
+      .mv-card {
+        flex: 1;
+      }
+
+      .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .timeline::before {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .timeline-item {
+        width: 50%;
+        padding: 0;
+      }
+
+      .timeline-item:nth-child(odd) {
+        left: 0;
+        padding-right: 45px;
+        text-align: right;
+      }
+
+      .timeline-item:nth-child(odd) .timeline-dot {
+        left: auto;
+        right: -10px;
+      }
+
+      .timeline-item:nth-child(even) {
+        left: 50%;
+        padding-left: 45px;
+      }
+
+      .timeline-item:nth-child(even) .timeline-dot {
+        left: -10px;
+      }
+
+      .timeline-item:nth-child(odd) .timeline-content:hover {
+        transform: translateX(-5px);
+      }
+
+      .certificate-section img {
+        max-width: 60%;
+      }
+
+      .contact-links {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .values-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main>
+    <section class="hero">
+      <div class="fade-in">
+        <h1>Kasangga ng Batang Kankaloo Association Inc.</h1>
+        <p class="tagline">Unity in Action, Heart in Service.</p>
+      </div>
+
+      <div class="who-we-are fade-in">
+        <p>Kasangga ng Batang Kankaloo Association Incorporated (KBKai) is a duly registered, non-profit, non-stock organization recognized by the Securities and Exchange Commission (SEC). Established to serve as a catalyst for positive change, the Association is committed to empowering individuals and families through inclusive, participatory, and sustainable community development initiatives.</p>
+        <p>The Association seeks to uplift the quality of life of its members by implementing livelihood programs, educational assistance, skills training, and community-based activities that promote self-reliance, resilience, and overall well-being. Through collective action and mutual support, KBKai creates opportunities that enable members to become productive, confident, and socially responsible individuals.</p>
+        <p>In pursuit of its goals, the Association actively collaborates with private institutions, non-government organizations, and local government units to ensure that programs are responsive to the real needs of the community. Guided by the spirit of bayanihan, Kasangga ng Batang Kankaloo Association Incorporated continues to advocate for inclusive growth, social development, and a better future for all its beneficiaries.</p>
+      </div>
+    </section>
+
+    <section class="container fade-in">
+      <div class="mission-vision">
+        <div class="mv-card mission-card">
+          <h2>Mission</h2>
+          <p>To uplift the lives of our members by providing accessible livelihood opportunities, educational assistance, skills training, and community development programs, while fostering unity, cooperation, and partnerships with private entities and local government units to promote sustainable growth and holistic well-being.</p>
+        </div>
+        <div class="mv-card vision-card">
+          <h2>Vision</h2>
+          <p>A self-reliant, empowered, and compassionate community where every member enjoys an improved quality of life through education, sustainable livelihood, and collective community development.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="container fade-in">
+      <h2 class="section-title">Core Values</h2>
+      <div class="values-grid">
+        <div class="value-card">
+          <h3>Bayanihan (Unity and Cooperation)</h3>
+          <p>We uphold the spirit of mutual help and collective responsibility, believing that meaningful progress is achieved when members work together toward shared goals.</p>
+        </div>
+        <div class="value-card">
+          <h3>Integrity and Accountability</h3>
+          <p>We commit to transparency, ethical conduct, and responsible stewardship of resources entrusted to the organization for the benefit of the community.</p>
+        </div>
+        <div class="value-card">
+          <h3>Empowerment and Self-Reliance</h3>
+          <p>We strive to equip members with knowledge, skills, and opportunities that enable them to become self-sufficient and confident contributors to society.</p>
+        </div>
+        <div class="value-card">
+          <h3>Inclusivity and Compassion</h3>
+          <p>We respect diversity and ensure that our programs are accessible, fair, and responsive to the needs of all members, especially the marginalized and vulnerable.</p>
+        </div>
+        <div class="value-card">
+          <h3>Partnership and Collaboration</h3>
+          <p>We value strong partnerships with private institutions, local government units, and other organizations to strengthen our impact and expand opportunities for community development.</p>
+        </div>
+        <div class="value-card">
+          <h3>Service and Social Responsibility</h3>
+          <p>We are dedicated to serving the community with sincerity and commitment, promoting social development and improving the overall well-being of our members.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="impact-section fade-in">
+      <div class="container stats-grid">
+        <div class="stat-item">
+          <h4><span class="counter" data-target="3000">0</span>+</h4>
+          <p>Active Members</p>
+        </div>
+        <div class="stat-item">
+          <h4><span class="counter" data-target="5">0</span></h4>
+          <p>Programs Launched</p>
+        </div>
+        <div class="stat-item">
+          <h4><span class="counter" data-target="7">0</span></h4>
+          <p>Institutions Partnered</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="container fade-in">
+      <h2 class="section-title">Our Story</h2>
+      <div class="timeline">
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>2025 | The Seed is Planted</h3>
+            <p>In 2025, KBKAI was founded with a clear vision: to uplift children, families, and communities. In the belief that meaningful change starts at the grassroots, KBKAI set out to create programs and partnerships that nurture growth, build resilience, and empower individuals to shape a brighter, more hopeful future.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>2025 – Present | Laying the Foundation</h3>
+            <p>Since 2025, our early programs have been dedicated to empowering individuals through education and practical skills training. In partnership with Emmanuel John Institute of Science & Technology, Inc. and JBEST School of Technology and Practical Skills, we focus on building confidence, fostering self-reliance, and equipping our members with knowledge to thrive.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>2025 – Present | Caring for Health and Vision</h3>
+            <p>Since 2025, KBKAI has prioritized the health and well-being of its members. In partnership with Esca Optical Shop and LNS Laboratory & Diagnostic Center, we addressed eye care and general health needs, offering members exclusive discounts on services.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>2026 – Present | Growing Together</h3>
+            <p>Early this year of 2026, we broadened our impact by launching livelihood programs and community-driven initiatives. Through partnerships with Personal Collection Direct Selling, Inc. and local government units, we strengthened support networks and created opportunities for economic growth.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mission-today fade-in">
+        <h3>Our Mission Today</h3>
+        <p>To inspire, support, and empower communities through sustainable initiatives that foster education, livelihood, health, and holistic well-being.</p>
+        <img src="https://res.cloudinary.com/dlte9ybza/image/upload/f_auto,q_auto/v1774422367/KBKD3_rfyabw.jpg" alt="KBKai Mission Today Image">
+      </div>
+
+      <div class="certificate-section fade-in">
+        <h3>Certificate of Incorporation</h3>
+        <img src="https://res.cloudinary.com/dlte9ybza/image/upload/f_auto,q_auto/v1774422738/SEC_COR_exwlao.jpg" alt="SEC Certificate of Registration">
+      </div>
+    </section>
+
+    <section class="contact-section fade-in">
+      <div class="container">
+        <h2>Join Us</h2>
+        <p>Be a part of the Organization or Partner in Providing Services to the Community</p>
+        <button id="contact-btn" class="btn">Talk to Our Team</button>
+
+        <div id="contact-info" class="contact-info">
+          <div class="contact-links">
+            <a href="mailto:kbkassociation@gmail.com">✉️ kbkassociation@gmail.com</a>
+            <a href="https://t.me/kbkai" target="_blank">✈️ t.me/kbkai</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Registered as Non-Stock, Non-Profit Organization with the Securities and Exchange Commission (SEC), Philippines. We are Committed to transparency, compliance, and ethical governance.</p><br>
+
+    <p>© 2025 Kasangga ng Batang kankaloo Association Inc.</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Scroll Fade-in Animation Observer
+      const fadeElements = document.querySelectorAll('.fade-in');
+      const fadeObserverOptions = {
+        root: null,
+        threshold: 0.15,
+        rootMargin: "0px 0px -50px 0px"
+      };
+      const fadeObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, fadeObserverOptions);
+      fadeElements.forEach(el => fadeObserver.observe(el));
+      // 2. Counter Animation Observer
+      const counters = document.querySelectorAll('.counter');
+      const speed = 100;
+      const counterObserverOptions = {
+        root: null,
+        threshold: 0.5
+      };
+      const counterObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const counter = entry.target;
+            const target = +counter.getAttribute('data-target');
+            const updateCount = () => {
+              const count = +counter.innerText;
+              const increment = target / speed;
+              if (count < target) {
+                counter.innerText = Math.ceil(count + increment);
+                setTimeout(updateCount, 20);
+              } else {
+                counter.innerText = target;
+              }
+            };
+            updateCount();
+            observer.unobserve(counter);
+          }
+        });
+      }, counterObserverOptions);
+      counters.forEach(counter => counterObserver.observe(counter));
+      // 3. Contact Button Toggle Logic
+      const contactBtn = document.getElementById('contact-btn');
+      const contactInfo = document.getElementById('contact-info');
+      contactBtn.addEventListener('click', () => {
+        contactInfo.classList.toggle('active');
+        if (contactInfo.classList.contains('active')) {
+          contactBtn.innerText = 'Hide Contact Info';
+        } else {
+          contactBtn.innerText = 'Talk to Our Team';
+        }
+      });
+    });
+  </script>
+  <script src="supabaseClient.js"></script>
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+</body>
+
+</html>

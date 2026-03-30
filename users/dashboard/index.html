@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Community Dashboard</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="topbottom.css">
+
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <!-- Prevent browser caching -->
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="dark-mode">
+  <main id="scroll-area">
+    <section class="greeting-section" id="greeting-box">
+      <div class="profile-container" onclick="location.href='profile.html'">
+        <img id="profile-pic" src="data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <circle cx='50' cy='50' r='50' fill='%23334155'/>
+    <circle cx='50' cy='40' r='20' fill='%239ca3af'/>
+    <rect x='25' y='60' width='50' height='25' rx='12' fill='%239ca3af'/>
+  </svg>" alt="Profile" class="skeleton-img">
+      </div>
+      <div class="greeting-text">
+        <h2 id="user-greeting" class="skeleton skeleton-text">Username</h2>
+        <p id="current-date"></p>
+      </div>
+    </section>
+
+    <section class="stats-section">
+      <div class="kpi-card glass skeleton-wrapper" id="active-members-card">
+        <span class="kpi-title skeleton skeleton-text">Active Members</span>
+        <h1 id="active-count" class="green-text skeleton skeleton-count">00</h1>
+      </div>
+    </section>
+
+    <div class="grid-container" id="role-grid">
+      <!-- Skeleton cards -->
+      <div class="role-card glass skeleton skeleton-card"></div>
+      <div class="role-card glass skeleton skeleton-card"></div>
+    </div><br>
+
+    <section class="carousel-container">
+      <h3>Previous Event Highlights</h3>
+      <div class="carousel-wrapper">
+
+        <button class="carousel-arrow prev" id="prev">&#10094;</button>
+        <button class="carousel-arrow next" id="next">&#10095;</button>
+
+        <div class="carousel-bullets" id="carousel-bullets"></div>
+
+        <div class="carousel-track" id="carousel">
+        </div>
+      </div>
+    </section>
+
+    <section class="events-section">
+      <h3>Upcoming Events</h3><br>
+      <div id="events-list">
+      </div>
+    </section>
+  </main>
+
+  <script src="supabaseClient.js"></script>
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
