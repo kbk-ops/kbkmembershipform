@@ -118,11 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // Animate counter
       animateValue(els.raffleCount, 0, raffleCount, 1000);
 
-      setField(els.email, member.email_address);
-      setField(els.mobile, member.mobile_number);
+      setField(els.email, member.email_add);
+      setField(els.mobile, member.phone_number);
       
       // Format DOB if exists
-      const dobStr = member.date_of_birth ? new Date(member.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
+      const dobStr = member.birth_date ? new Date(member.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
       setField(els.dob, dobStr);
       
       setField(els.precinct, member.precinct_no);
