@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="topbottom.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div id="top-nav"></div>
+
+    <main class="profile-container">
+        <!-- Profile Card -->
+        <section class="profile-card">
+            <div class="profile-pic-container">
+                <img id="profile-pic" src="" alt="Profile Picture">
+            </div>
+            <h1 id="full-name">Full Name</h1>
+            <p id="id-number">ID Number</p>
+            <p id="designation">Designation</p>
+            <div class="raffle-container">
+                <p>Electronic Raffle:</p>
+                <span id="raffle-count">0</span>
+            </div>
+        </section>
+
+        <!-- User Details -->
+        <section class="user-details">
+            <div class="detail"><span>Date of Birth:</span> <span id="dob"></span></div>
+            <div class="detail"><span>Address:</span> <span id="address"></span></div>
+            <div class="detail"><span>Barangay:</span> <span id="barangay"></span></div>
+            <div class="detail"><span>District:</span> <span id="district"></span></div>
+            <div class="detail"><span>E-mail Add:</span> <span id="email"></span></div>
+            <div class="detail"><span>Mobile Number:</span> <span id="phone"></span></div>
+            <div class="detail"><span>Precinct No.:</span> <span id="precinct"></span></div>
+            <div class="detail"><span>Referrer:</span> <span id="referrer"></span></div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <div id="bottom-nav"></div>
+
+    <script src="supabaseClient.js"></script>
+    <script src="components.js"></script>
+    <script src="profile.js"></script>
+</body>
+</html>
