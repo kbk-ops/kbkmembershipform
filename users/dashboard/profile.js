@@ -1,5 +1,5 @@
 // Use your existing supabaseClient.js
-const supabase = window.supabaseClient;
+const supabaseClient = window.supabaseClient;
 
 // Generic SVG icon for profile picture
 const GENERIC_PROFILE_SVG = `
@@ -10,7 +10,7 @@ const GENERIC_PROFILE_SVG = `
 
 async function loadUserProfile() {
   // Get logged-in user from Supabase Auth
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
   if (userError || !user) {
     console.error('No logged-in user', userError);
