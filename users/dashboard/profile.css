@@ -1,0 +1,110 @@
+/* Root variables for gradients */
+:root {
+    --grad-green: linear-gradient(135deg, #00c853, #b9f6ca);
+    --grad-violet: linear-gradient(135deg, #7c4dff, #b388ff);
+    --grad-red: linear-gradient(135deg, #ff1744, #ff8a80);
+    --grad-orange: linear-gradient(135deg, #ff9100, #ffc947);
+
+    --text-color: #e0e0e0;
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --transition-speed: 0.3s;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+.profile-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+    transition: all var(--transition-speed);
+}
+
+.profile-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    transition: transform var(--transition-speed), background var(--transition-speed);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    background: var(--grad-violet);
+    color: #fff;
+}
+
+.profile-pic-container {
+    width: 150px;
+    height: 150px;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    animation: pulse 2s infinite alternate;
+}
+
+.profile-pic-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.raffle-container {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+.raffle-container span {
+    font-weight: bold;
+    font-size: 2rem;
+    display: inline-block;
+    transition: transform 0.5s ease;
+}
+
+/* User details styling */
+.user-details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.detail {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    transition: background var(--transition-speed);
+}
+
+.detail:hover {
+    background: var(--grad-green);
+}
+
+/* Responsive grid */
+@media(min-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr 2fr;
+    }
+
+    .user-details {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
