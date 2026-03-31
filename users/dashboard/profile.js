@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .eq('id_number', idNumber)
           .single(),
         supabaseClient
-          .from('contribitions')
+          .from('contributions')
           .select('*', { count: 'exact', head: true })
           .eq('id_number', idNumber)
           .eq('raffle_status', 'On Track')
