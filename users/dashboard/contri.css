@@ -134,6 +134,10 @@ button {
   height: 24px;
 }
 
+.top-bar .icon-btn {
+  padding: 0 !important;
+}
+
 button:hover:not(:disabled) {
   transform: translateY(-2px);
 }
