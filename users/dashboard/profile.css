@@ -324,3 +324,8 @@
     grid-column: 1 / -1;
   }
 }
+
+/* FIX for topbottom.css: Prevents the top-bar from overflowing the screen width */
+.top-bar {
+  box-sizing: border-box !important;
+}
