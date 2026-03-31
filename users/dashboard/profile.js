@@ -1,128 +1,187 @@
-const supabase = window.supabaseClient;
+document.addEventListener("DOMContentLoaded", () => {
+  // Assume window.supabaseClient is initialized in supabaseClient.js
+  const supabase = window.supabaseClient;
 
-const GENERIC_PROFILE_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="#bdbdbd">
-  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-</svg>
-`;
+  // DOM Elements
+  const elSkeleton = document.getElementById("profile-skeleton");
+  const elContent = document.getElementById("profile-content");
+  const elError = document.getElementById("profile-error");
+  const elErrorMsg = document.getElementById("profile-error-msg");
 
-async function loadUserProfile() {
-  console.log("Loading profile...");
+  // Profile Elements
+  const els = {
+    avatar: document.getElementById("profile-picture"),
+    fullname: document.getElementById("profile-fullname"),
+    designation: document.getElementById("profile-designation"),
+    idNumber: document.getElementById("profile-id-number"),
+    raffleCount: document.getElementById("profile-raffle-count"),
+    email: document.getElementById("profile-email"),
+    mobile: document.getElementById("profile-mobile"),
+    dob: document.getElementById("profile-dob"),
+    precinct: document.getElementById("profile-precinct"),
+    address: document.getElementById("profile-address"),
+    barangay: document.getElementById("profile-barangay"),
+    district: document.getElementById("profile-district"),
+    referrer: document.getElementById("profile-referrer")
+  };
 
-  try {
-    // 1️⃣ Get logged-in user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error("Auth error:", userError);
-      return;
+  /**
+   * Optimize Cloudinary Image URL based on constraints
+   */
+  const optimizeImage = (url) => {
+    if (!url) return 'https://res.cloudinary.com/demo/image/upload/d_avatar.png/non_existing_id.png'; // Fallback logic if needed
+    
+    // Inject f_auto,q_auto,w_300 into Cloudinary URL
+    if (url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/f_auto,q_auto,w_300,c_fill,ar_1:1/');
     }
+    return url;
+  };
 
-    if (!user) {
-      console.warn("No logged-in user detected. Make sure a session exists.");
-      return;
+  /**
+   * Format full name handling nulls and N/A
+   */
+  const formatFullName = (first, middle, last, suffix) => {
+    const isInvalid = (val) => !val || val.toLowerCase() === 'n/a' || val.toLowerCase() === 'none';
+    
+    let nameArr = [];
+    if (!isInvalid(first)) nameArr.push(first);
+    if (!isInvalid(middle)) nameArr.push(`${middle.charAt(0).toUpperCase()}.`);
+    if (!isInvalid(last)) nameArr.push(last);
+    if (!isInvalid(suffix)) nameArr.push(suffix);
+
+    return nameArr.join(" ") || "Unknown User";
+  };
+
+  /**
+   * Set text content, providing a fallback for empty values
+   */
+  const setField = (element, value, fallback = "N/A") => {
+    if (element) {
+      element.textContent = (value && value.trim() !== "") ? value : fallback;
     }
+  };
 
-    console.log("Logged-in user:", user);
+  /**
+   * Main Initialization Function
+   */
+  const initProfile = async () => {
+    try {
+      // 1. Get Auth User
+      const { data: authData, error: authErr } = await supabase.auth.getUser();
+      if (authErr || !authData?.user) throw new Error("Authentication failed. Please log in.");
+      const authUserId = authData.user.id;
 
-    // 2️⃣ Get id_number from user_roles
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("id_number")
-      .eq("auth_user_id", user.id)
-      .single();
+      // 2. Fetch user_roles matching auth_user_id to get id_number
+      const { data: roleData, error: roleErr } = await supabase
+        .from('user_roles')
+        .select('id_number')
+        .eq('auth_user_id', authUserId)
+        .single();
+        
+      if (roleErr || !roleData?.id_number) throw new Error("User role not found.");
+      const idNumber = roleData.id_number;
 
-    if (roleError) {
-      console.error("Error fetching user_roles:", roleError);
-      return;
+      // 3. Parallel fetch: members_data and Raffle Count
+      const [memberRes, raffleRes] = await Promise.all([
+        supabase
+          .from('members_data')
+          .select('*')
+          .eq('id_number', idNumber)
+          .single(),
+        supabase
+          .from('user_roles')
+          .select('*', { count: 'exact', head: true })
+          .eq('id_number', idNumber)
+          .eq('raffle_status', 'On Track')
+      ]);
+
+      if (memberRes.error || !memberRes.data) throw new Error("Member data not found.");
+      
+      const member = memberRes.data;
+      const raffleCount = raffleRes.count || 0;
+
+      // 4. Populate DOM
+      els.avatar.src = optimizeImage(member.picture);
+      
+      const fullName = formatFullName(
+        member.first_name, 
+        member.middle_name, 
+        member.last_name, 
+        member.suffix
+      );
+      
+      setField(els.fullname, fullName);
+      setField(els.designation, member.designation, "Member");
+      setField(els.idNumber, member.id_number);
+      
+      // Animate counter
+      animateValue(els.raffleCount, 0, raffleCount, 1000);
+
+      setField(els.email, member.email_address);
+      setField(els.mobile, member.mobile_number);
+      
+      // Format DOB if exists
+      const dobStr = member.date_of_birth ? new Date(member.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
+      setField(els.dob, dobStr);
+      
+      setField(els.precinct, member.precinct_no);
+      setField(els.address, member.address);
+      setField(els.barangay, member.barangay);
+      setField(els.district, member.district);
+      setField(els.referrer, member.referrer);
+
+      // Hide Skeleton, Show Content
+      elSkeleton.style.display = 'none';
+      elContent.style.display = 'block';
+      elContent.classList.add('profile-fade-in');
+
+    } catch (err) {
+      console.error("Profile Load Error:", err);
+      elSkeleton.style.display = 'none';
+      elError.style.display = 'block';
+      elErrorMsg.textContent = err.message || "An unexpected error occurred.";
     }
+  };
 
-    if (!roleData) {
-      console.warn("No role data found for user:", user.id);
-      return;
-    }
-
-    const userIdNumber = roleData.id_number;
-    console.log("User id_number:", userIdNumber);
-
-    // 3️⃣ Get members_data by id_number
-    const { data: profile, error: profileError } = await supabase
-      .from("members_data")
-      .select("*")
-      .eq("id_number", userIdNumber)
-      .maybeSingle();
-
-    if (profileError) {
-      console.error("Error fetching members_data:", profileError);
-      return;
-    }
-
-    if (!profile) {
-      console.warn("No members_data found for id_number:", userIdNumber);
-      return;
-    }
-
-    console.log("Profile data:", profile);
-
-    // 4️⃣ Render profile picture
-    const profilePic = document.getElementById("profile-pic");
-    if (profile.picture) {
-      profilePic.src = `${profile.picture}?auto=format&fit=crop&w=200&h=200`;
-    } else {
-      profilePic.outerHTML = `<div class="profile-pic-container">${GENERIC_PROFILE_SVG}</div>`;
-    }
-
-    // 5️⃣ Render full name
-    const middleInitial =
-      profile.middle_name && profile.middle_name !== "N/A"
-        ? profile.middle_name[0] + "."
-        : "";
-    const suffix = profile.suffix ? ` ${profile.suffix}` : "";
-    const fullName = `${profile.first_name} ${middleInitial} ${profile.last_name}${suffix}`;
-    document.getElementById("full-name").textContent = fullName;
-
-    // 6️⃣ Other fields
-    const fields = {
-      "id-number": profile.id_number,
-      designation: profile.designation,
-      dob: profile.birth_date,
-      address: profile.address,
-      barangay: profile.barangay,
-      district: profile.district,
-      email: profile.email_add,
-      phone: profile.phone_number,
-      precinct: profile.precint_no,
-      referrer: profile.referrer,
+  /**
+   * Utility: Animate numbers counting up
+   */
+  const animateValue = (obj, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      obj.innerHTML = Math.floor(progress * (end - start) + start);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
     };
+    window.requestAnimationFrame(step);
+  };
 
-    for (const [id, value] of Object.entries(fields)) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value || "N/A";
-    }
+  /**
+   * Copy to Clipboard Event
+   */
+  const copyBtn = document.getElementById('profile-btn-copy');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const idTxt = els.idNumber.textContent;
+      if (!idTxt || idTxt === "N/A") return;
 
-    // 7️⃣ Electronic Raffle from contributions
-    const { data: raffleData, error: raffleError } = await supabase
-      .from("contributions")
-      .select("payment_id")
-      .eq("id_number", userIdNumber)
-      .eq("raffle_status", "On Track");
-
-    if (raffleError) {
-      console.error("Error fetching raffle count:", raffleError);
-      return;
-    }
-
-    const raffleCount = raffleData?.length || 0;
-    const raffleEl = document.getElementById("raffle-count");
-    if (raffleEl) raffleEl.textContent = raffleCount;
-    raffleEl.style.transform = "scale(1.3)";
-    setTimeout(() => { raffleEl.style.transform = "scale(1)"; }, 500);
-
-    console.log("Profile loaded successfully!");
-
-  } catch (err) {
-    console.error("Unexpected error loading profile:", err);
+      navigator.clipboard.writeText(idTxt).then(() => {
+        const originalTitle = copyBtn.title;
+        copyBtn.title = "Copied!";
+        // Highlight effect
+        copyBtn.style.color = "#00b09b";
+        setTimeout(() => {
+          copyBtn.title = originalTitle;
+          copyBtn.style.color = "";
+        }, 2000);
+      });
+    });
   }
-}
 
-document.addEventListener("DOMContentLoaded", loadUserProfile);
+  // Trigger init on load
+  initProfile();
+});
