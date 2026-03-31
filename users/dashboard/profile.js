@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Assume window.supabaseClient is initialized in supabaseClient.js
-  const supabase = window.supabaseClient;
+  const supabaseClient = window.supabaseClient;
 
   // DOM Elements
   const elSkeleton = document.getElementById("profile-skeleton");
@@ -68,12 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const initProfile = async () => {
     try {
       // 1. Get Auth User
-      const { data: authData, error: authErr } = await supabase.auth.getUser();
+      const { data: authData, error: authErr } = await supabaseClient.auth.getUser();
       if (authErr || !authData?.user) throw new Error("Authentication failed. Please log in.");
       const authUserId = authData.user.id;
 
       // 2. Fetch user_roles matching auth_user_id to get id_number
-      const { data: roleData, error: roleErr } = await supabase
+      const { data: roleData, error: roleErr } = await supabaseClient
         .from('user_roles')
         .select('id_number')
         .eq('auth_user_id', authUserId)
@@ -84,13 +84,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 3. Parallel fetch: members_data and Raffle Count
       const [memberRes, raffleRes] = await Promise.all([
-        supabase
+        supabaseClient
           .from('members_data')
           .select('*')
           .eq('id_number', idNumber)
           .single(),
-        supabase
-          .from('user_roles')
+        supabaseClient
+          .from('contributions')
           .select('*', { count: 'exact', head: true })
           .eq('id_number', idNumber)
           .eq('raffle_status', 'On Track')
