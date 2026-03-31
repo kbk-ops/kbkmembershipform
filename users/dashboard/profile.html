@@ -1,46 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
-    <link rel="stylesheet" href="topbottom.css">
-    <link rel="stylesheet" href="profile.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <link rel="stylesheet" href="topbottom.css">
+  <link rel="stylesheet" href="profile.css">
 </head>
-<body>
-    <!-- Top Navigation -->
-    <div id="top-nav"></div>
+<body class="profile-body-theme">
+  <header id="top-nav"></header>
 
-    <main class="profile-container">
-        <!-- Profile Card -->
-        <section class="profile-card">
-            <div class="profile-pic-container">
-                <img id="profile-pic" src="" alt="Profile Picture">
-            </div>
-            <h1 id="full-name">Full Name</h1>
-            <p id="id-number">ID Number</p>
-            <p id="designation">Designation</p>
-            <div class="raffle-container">
-                <p>Electronic Raffle:</p>
-                <span id="raffle-count">0</span>
-            </div>
-        </section>
+  <main class="profile-container">
+    
+    <div id="profile-skeleton" class="profile-skeleton-wrapper">
+      <div class="profile-glass-card profile-skeleton-header">
+        <div class="profile-skeleton-avatar profile-pulse"></div>
+        <div class="profile-skeleton-text profile-skeleton-title profile-pulse"></div>
+        <div class="profile-skeleton-text profile-pulse"></div>
+        <div class="profile-skeleton-text profile-skeleton-badge profile-pulse"></div>
+      </div>
+      <div class="profile-details-grid">
+        <div class="profile-glass-card profile-skeleton-box profile-pulse"></div>
+        <div class="profile-glass-card profile-skeleton-box profile-pulse"></div>
+        <div class="profile-glass-card profile-skeleton-box profile-pulse"></div>
+        <div class="profile-glass-card profile-skeleton-box profile-pulse"></div>
+      </div>
+    </div>
 
-        <!-- User Details -->
-        <section class="user-details">
-            <div class="detail"><span>Date of Birth:</span> <span id="dob"></span></div>
-            <div class="detail"><span>Address:</span> <span id="address"></span></div>
-            <div class="detail"><span>Barangay:</span> <span id="barangay"></span></div>
-            <div class="detail"><span>District:</span> <span id="district"></span></div>
-            <div class="detail"><span>E-mail Add:</span> <span id="email"></span></div>
-            <div class="detail"><span>Mobile Number:</span> <span id="phone"></span></div>
-            <div class="detail"><span>Precinct No.:</span> <span id="precinct"></span></div>
-            <div class="detail"><span>Referrer:</span> <span id="referrer"></span></div>
-        </section>
-    </main>
+    <div id="profile-error" class="profile-glass-card profile-error-state" style="display: none;">
+      <svg class="profile-error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <h3 id="profile-error-title">Unable to load profile</h3>
+      <p id="profile-error-msg">Please check your connection or try again later.</p>
+      <button class="profile-btn-retry" onclick="location.reload()">Retry</button>
+    </div>
 
-    <!-- Bottom Navigation -->
-    <div id="bottom-nav"></div>
+    <div id="profile-content" class="profile-content-wrapper" style="display: none;">
+      
+      <section class="profile-glass-card profile-header-section">
+        <div class="profile-avatar-container">
+          <img id="profile-picture" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Profile Picture" class="profile-avatar" loading="lazy">
+        </div>
+        
+        <h1 id="profile-fullname" class="profile-name"></h1>
+        <p id="profile-designation" class="profile-designation"></p>
+        
+        <div class="profile-id-container">
+          <span class="profile-id-label">ID:</span>
+          <span id="profile-id-number" class="profile-id-val"></span>
+          <button id="profile-btn-copy" class="profile-icon-btn" title="Copy ID">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          </button>
+        </div>
+
+        <div class="profile-raffle-badge">
+          <span class="profile-raffle-title">Raffle Entries</span>
+          <span id="profile-raffle-count" class="profile-raffle-count">0</span>
+        </div>
+      </section>
+
+      <section class="profile-details-grid">
+        <div class="profile-glass-card profile-data-card">
+          <div class="profile-data-label">Email Address</div>
+          <div id="profile-email" class="profile-data-value"></div>
+        </div>
+        <div class="profile-glass-card profile-data-card">
+          <div class="profile-data-label">Mobile Number</div>
+          <div id="profile-mobile" class="profile-data-value"></div>
+        </div>
+        <div class="profile-glass-card profile-data-card">
+          <div class="profile-data-label">Date of Birth</div>
+          <div id="profile-dob" class="profile-data-value"></div>
+        </div>
+        <div class="profile-glass-card profile-data-card">
+          <div class="profile-data-label">Precinct No.</div>
+          <div id="profile-precinct" class="profile-data-value"></div>
+        </div>
+        
+        <div class="profile-glass-card profile-data-card profile-span-full">
+          <div class="profile-data-label">Full Address</div>
+          <div id="profile-address" class="profile-data-value"></div>
+          <div class="profile-sub-address">
+            <span id="profile-barangay"></span> • <span id="profile-district"></span>
+          </div>
+        </div>
+
+        <div class="profile-glass-card profile-data-card profile-span-full">
+          <div class="profile-data-label">Referrer</div>
+          <div id="profile-referrer" class="profile-data-value"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer id="bottom-nav"></footer>
 
     <script src="supabaseClient.js"></script>
     <script src="authGuard.js"></script>
