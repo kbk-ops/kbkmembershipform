@@ -1,68 +1,81 @@
-// Ensure supabaseClient.js is loaded
-const supabaseClient = window.supabaseClient; // from supabaseClient.js
+// Use your existing supabaseClient.js
+const supabase = window.supabaseClient;
 
-// Simulate logged-in user id_number
-const currentUserId = "123456"; // replace dynamically if needed
+// Generic SVG icon for profile picture
+const GENERIC_PROFILE_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="#bdbdbd">
+  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+</svg>
+`;
 
 async function loadUserProfile() {
-    // Fetch member data
-    const { data: members, error: memberError } = await supabaseClient
-        .from('members_data')
-        .select('*')
-        .eq('id_number', currentUserId)
-        .single();
+  // Get logged-in user from Supabase Auth
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (memberError) {
-        console.error(memberError);
-        return;
-    }
+  if (userError || !user) {
+    console.error('No logged-in user', userError);
+    return;
+  }
 
-    // Populate profile picture
-    const profilePic = document.getElementById('profile-pic');
-    if (members.picture) {
-        profilePic.src = `${members.picture}?auto=format&fit=crop&w=200&h=200`; // optimize Cloudinary URL
-    } else {
-        profilePic.src = 'default-avatar.png'; // fallback
-    }
+  // Fetch members_data based on user's email
+  const { data: member, error: memberError } = await supabase
+    .from('members_data')
+    .select('*')
+    .eq('email_add', user.email)
+    .single();
 
-    // Full Name
-    const middleInitial = members.middle_name && members.middle_name !== 'N/A' ? members.middle_name[0] + '.' : '';
-    const suffix = members.suffix ? ` ${members.suffix}` : '';
-    const fullName = `${members.first_name} ${middleInitial} ${members.last_name}${suffix}`;
-    document.getElementById('full-name').textContent = fullName;
+  if (memberError || !member) {
+    console.error('Member data not found', memberError);
+    return;
+  }
 
-    // Other profile data
-    document.getElementById('id-number').textContent = members.id_number;
-    document.getElementById('designation').textContent = members.designation || 'N/A';
-    document.getElementById('dob').textContent = members.birth_date || 'N/A';
-    document.getElementById('address').textContent = members.address || 'N/A';
-    document.getElementById('barangay').textContent = members.barangay || 'N/A';
-    document.getElementById('district').textContent = members.district || 'N/A';
-    document.getElementById('email').textContent = members.email_add || 'N/A';
-    document.getElementById('phone').textContent = members.phone_number || 'N/A';
-    document.getElementById('precinct').textContent = members.precint_no || 'N/A';
-    document.getElementById('referrer').textContent = members.referrer || 'N/A';
+  // Profile picture
+  const profilePic = document.getElementById('profile-pic');
+  if (member.picture) {
+    profilePic.src = `${member.picture}?auto=format&fit=crop&w=200&h=200`;
+  } else {
+    // Insert generic SVG icon
+    profilePic.outerHTML = `<div class="profile-pic-container">${GENERIC_PROFILE_SVG}</div>`;
+  }
 
-    // Fetch Electronic Raffle Count
-    const { data: raffleData, error: raffleError } = await supabase
-        .from('user_roles')
-        .select('id_number')
-        .eq('id_number', currentUserId)
-        .eq('raffle_status', 'On Track');
+  // Full Name with middle initial & suffix
+  const middleInitial = member.middle_name && member.middle_name !== 'N/A' ? member.middle_name[0] + '.' : '';
+  const suffix = member.suffix ? ` ${member.suffix}` : '';
+  const fullName = `${member.first_name} ${middleInitial} ${member.last_name}${suffix}`;
+  document.getElementById('full-name').textContent = fullName;
 
-    if (raffleError) {
-        console.error(raffleError);
-        return;
-    }
+  // Other profile data
+  document.getElementById('id-number').textContent = member.id_number;
+  document.getElementById('designation').textContent = member.designation || 'N/A';
+  document.getElementById('dob').textContent = member.birth_date || 'N/A';
+  document.getElementById('address').textContent = member.address || 'N/A';
+  document.getElementById('barangay').textContent = member.barangay || 'N/A';
+  document.getElementById('district').textContent = member.district || 'N/A';
+  document.getElementById('email').textContent = member.email_add || 'N/A';
+  document.getElementById('phone').textContent = member.phone_number || 'N/A';
+  document.getElementById('precinct').textContent = member.precint_no || 'N/A';
+  document.getElementById('referrer').textContent = member.referrer || 'N/A';
 
-    const raffleCount = raffleData.length;
-    const raffleElement = document.getElementById('raffle-count');
-    raffleElement.textContent = raffleCount;
+  // Fetch Electronic Raffle count
+  const { data: raffleData, error: raffleError } = await supabase
+    .from('user_roles')
+    .select('id_number')
+    .eq('id_number', member.id_number)
+    .eq('raffle_status', 'On Track');
 
-    // Animate count
-    raffleElement.style.transform = 'scale(1.3)';
-    setTimeout(() => { raffleElement.style.transform = 'scale(1)'; }, 500);
+  if (raffleError) {
+    console.error(raffleError);
+    return;
+  }
+
+  const raffleCount = raffleData.length;
+  const raffleElement = document.getElementById('raffle-count');
+  raffleElement.textContent = raffleCount;
+
+  // Animate count
+  raffleElement.style.transform = 'scale(1.3)';
+  setTimeout(() => { raffleElement.style.transform = 'scale(1)'; }, 500);
 }
 
-// Load profile on page load
+// Load profile on page ready
 document.addEventListener('DOMContentLoaded', loadUserProfile);
