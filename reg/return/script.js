@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Mapping
   document.getElementById("m-date").innerText = data.timestamp;
-  document.getElementById("m-id").innerText = data.id;
+  document.getElementById("m-id").innerText = data.id_number;
   document.getElementById("m-pic").src = data.picture;
   document.getElementById("m-first").innerText = `${data.first_name} ${
     data.suffix || ""
