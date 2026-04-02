@@ -35,37 +35,32 @@ nextBtn.onclick = async () => {
     loader.style.display = "block";
 
     try {
-        
-        const { data: member, error } = await db
-            .from('members_data')
-            .select('id_number, first_name, last_name, suffix, status')
-            .eq('id_number', id)
-            .maybeSingle();
+        const res = await fetch("https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id })
+        });
 
+        const result = await res.json();
         loader.style.display = "none";
 
-        if (error) throw error;
-
-        if (!member) {
-            errorEl.textContent = "Referrer ID not found";
+        if (!res.ok) {
+            errorEl.textContent = result.error;
             nextBtn.disabled = false;
             return;
         }
 
-        if (member.status !== "Active") {
-            errorEl.textContent = "Referrer is not Active";
-            nextBtn.disabled = false;
-            return;
-        }
+        currentReferrerData = result.referrer;
 
-        currentReferrerData = member;
         step1.style.display = "none";
         step2.style.display = "block";
 
     } catch (err) {
-        console.error("Step 1 Error:", err);
+        console.error(err);
         loader.style.display = "none";
-        errorEl.textContent = "Connection error. Check console.";
+        errorEl.textContent = "Connection error.";
         nextBtn.disabled = false;
     }
 };
@@ -86,25 +81,27 @@ continueBtn.onclick = async () => {
     loader.style.display = "block";
 
     try {
+        const res = await fetch("https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: currentReferrerData.id_number,
+                email
+            })
+        });
 
-        const { data: existingEntry, error } = await db
-            .from('members_data')
-            .select('email_add')
-            .ilike('email_add', email) 
-            .maybeSingle();
-
+        const result = await res.json();
         loader.style.display = "none";
 
-        if (error) throw error;
-
-        if (existingEntry) {
-            errorEl.textContent = "Email already registered";
+        if (!res.ok) {
+            errorEl.textContent = result.error;
             continueBtn.disabled = false;
             return;
         }
 
-        // --- Save to Session Storage ---
-        sessionStorage.setItem("referrerID", currentReferrerData.id);
+        sessionStorage.setItem("referrerID", currentReferrerData.id_number);
         sessionStorage.setItem("registerEmail", email.toLowerCase());
         sessionStorage.setItem("referrerFirstName", currentReferrerData.first_name);
         sessionStorage.setItem("referrerLastName", currentReferrerData.last_name);
@@ -113,9 +110,9 @@ continueBtn.onclick = async () => {
         window.location.replace("../reg/form/index.html");
 
     } catch (err) {
-        console.error("Step 2 Error:", err);
+        console.error(err);
         loader.style.display = "none";
-        errorEl.textContent = "Database error during email check.";
+        errorEl.textContent = "Server error.";
         continueBtn.disabled = false;
     }
 };
