@@ -1,12 +1,11 @@
-// 1. --- Supabase Configuration ---
-const SUPABASE_URL = "https://ayynblvknxuvazbwpxpm.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5eW5ibHZrbnh1dmF6YndweHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzk2NjEsImV4cCI6MjA4OTM1NTY2MX0.iQYNqs0W1YJB2PTxBUTOZnpKBl6FU0UVxJzDmyOEOmM";
+// -------------------------
+// CONFIG
+// -------------------------
+const FUNCTION_URL = "https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer";
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { persistSession: false }
-});
-
-// 2. --- DOM Elements ---
+// -------------------------
+// DOM ELEMENTS
+// -------------------------
 const step1 = document.getElementById("step1");
 const step2 = document.getElementById("step2");
 const idNumberInput = document.getElementById("idNumber");
@@ -16,6 +15,9 @@ const loader = document.getElementById("loader");
 const nextBtn = document.getElementById("nextBtn");
 const continueBtn = document.getElementById("continueBtn");
 
+// -------------------------
+// STATE
+// -------------------------
 sessionStorage.clear();
 let currentReferrerData = null;
 
@@ -35,7 +37,7 @@ nextBtn.onclick = async () => {
     loader.style.display = "block";
 
     try {
-        const res = await fetch("https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer", {
+        const res = await fetch(FUNCTION_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -47,20 +49,22 @@ nextBtn.onclick = async () => {
         loader.style.display = "none";
 
         if (!res.ok) {
-            errorEl.textContent = result.error;
+            errorEl.textContent = result.error || "Validation failed";
             nextBtn.disabled = false;
             return;
         }
 
+        // Save referrer data
         currentReferrerData = result.referrer;
 
+        // Move to next step
         step1.style.display = "none";
         step2.style.display = "block";
 
     } catch (err) {
-        console.error(err);
+        console.error("Step 1 Error:", err);
         loader.style.display = "none";
-        errorEl.textContent = "Connection error.";
+        errorEl.textContent = "Connection error. Please try again.";
         nextBtn.disabled = false;
     }
 };
@@ -77,11 +81,16 @@ continueBtn.onclick = async () => {
         return;
     }
 
+    if (!currentReferrerData) {
+        errorEl.textContent = "Referrer data missing. Please go back.";
+        return;
+    }
+
     continueBtn.disabled = true;
     loader.style.display = "block";
 
     try {
-        const res = await fetch("https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer", {
+        const res = await fetch(FUNCTION_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -96,27 +105,34 @@ continueBtn.onclick = async () => {
         loader.style.display = "none";
 
         if (!res.ok) {
-            errorEl.textContent = result.error;
+            errorEl.textContent = result.error || "Email validation failed";
             continueBtn.disabled = false;
             return;
         }
 
+        // -------------------------
+        // SAVE SESSION DATA
+        // -------------------------
         sessionStorage.setItem("referrerID", currentReferrerData.id_number);
         sessionStorage.setItem("registerEmail", email.toLowerCase());
         sessionStorage.setItem("referrerFirstName", currentReferrerData.first_name);
         sessionStorage.setItem("referrerLastName", currentReferrerData.last_name);
         sessionStorage.setItem("referrerSuffix", currentReferrerData.suffix || "");
 
+        // Redirect to form
         window.location.replace("../reg/form/index.html");
 
     } catch (err) {
-        console.error(err);
+        console.error("Step 2 Error:", err);
         loader.style.display = "none";
-        errorEl.textContent = "Server error.";
+        errorEl.textContent = "Server error. Please try again.";
         continueBtn.disabled = false;
     }
 };
 
+// ----------------------
+// EMAIL VALIDATOR
+// ----------------------
 function validateEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
