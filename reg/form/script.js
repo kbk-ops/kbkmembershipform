@@ -1,6 +1,6 @@
-const SUPABASE_URL = "https://bxezqlrgfsucvjuimgjw.supabase.co";
+const SUPABASE_URL = "https://ayynblvknxuvazbwpxpm.supabase.co";
 const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4ZXpxbHJnZnN1Y3ZqdWltZ2p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MDYyNjUsImV4cCI6MjA4NTE4MjI2NX0.XeAM-FpM6MLVMsZ7Gotj0cxd5-6-3nNBeHX_AvPRU08";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5eW5ibHZrbnh1dmF6YndweHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzk2NjEsImV4cCI6MjA4OTM1NTY2MX0.iQYNqs0W1YJB2PTxBUTOZnpKBl6FU0UVxJzDmyOEOmM";
 const CLOUD_NAME = "dlte9ybza";
 const CLOUDINARY_PRESET = "id_image_upload";
 const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Asst. Youth Secretary"
     ];
     const { data } = await _supabase
-      .from("kbk_membership_data")
+      .from("members_data")
       .select("designation")
       .eq("barangay", bInput);
     const taken = data ? data.map((d) => d.designation) : [];
@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 12. ID Generation
       const dist = getDistrictInfo(barangay);
       const { count } = await _supabase
-        .from("kbk_membership_data")
+        .from("members_data")
         .select("*", { count: "exact", head: true });
       const memberID = `BK26-${dist.code}${(count + 1)
         .toString()
