@@ -1,6 +1,6 @@
 // 1. --- Supabase Configuration ---
-const SUPABASE_URL = "https://bxezqlrgfsucvjuimgjw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4ZXpxbHJnZnN1Y3ZqdWltZ2p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MDYyNjUsImV4cCI6MjA4NTE4MjI2NX0.XeAM-FpM6MLVMsZ7Gotj0cxd5-6-3nNBeHX_AvPRU08";
+const SUPABASE_URL = "https://ayynblvknxuvazbwpxpm.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5eW5ibHZrbnh1dmF6YndweHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzk2NjEsImV4cCI6MjA4OTM1NTY2MX0.iQYNqs0W1YJB2PTxBUTOZnpKBl6FU0UVxJzDmyOEOmM";
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: false }
@@ -37,9 +37,9 @@ nextBtn.onclick = async () => {
     try {
         
         const { data: member, error } = await db
-            .from('kbk_membership_data')
-            .select('id, first_name, last_name, suffix, status')
-            .eq('id', id)
+            .from('members_data')
+            .select('id_number, first_name, last_name, suffix, status')
+            .eq('id_number', id)
             .maybeSingle();
 
         loader.style.display = "none";
@@ -88,7 +88,7 @@ continueBtn.onclick = async () => {
     try {
 
         const { data: existingEntry, error } = await db
-            .from('kbk_membership_data')
+            .from('members_data')
             .select('email_add')
             .ilike('email_add', email) 
             .maybeSingle();
