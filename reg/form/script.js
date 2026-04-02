@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 14. Supabase Insert
       const payload = {
-        id: memberID,
+        id_number: memberID,
         qr_code: `https://quickchart.io/qr?text=${memberID}&size=500`,
         email_add: sessionStorage.getItem("registerEmail") || "",
         first_name: firstName,
