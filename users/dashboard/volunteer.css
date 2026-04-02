@@ -1,0 +1,372 @@
+.volunteer-hub-container {
+  /* Gradients specified in requirements */
+  --vhgreen-grad: linear-gradient(135deg, #00b09b, #96c93d);
+  --vhviolet-grad: linear-gradient(135deg, #8e2de2, #4a00e0);
+  --vhred-grad: linear-gradient(135deg, #ff416c, #ff4b2b);
+  --vhorange-grad: linear-gradient(135deg, #f12711, #f5af19);
+
+  /* Theme variables */
+  --bg-color: #0f0f13;
+  --glass-bg: rgba(25, 25, 32, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-main: #ffffff;
+  --text-muted: #a0a0a5;
+  --neon-green-shadow: 0 0 15px rgba(150, 201, 61, 0.3);
+
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding-top: 70px !important;
+  padding-bottom: 80px !important;
+  background-color: var(--bg-color);
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.volunteer-hub-container * {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #0f0f13;
+  color: #e0e0e0;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+  visibility: hidden;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  width: 100%;
+  margin: 20px auto;
+  max-width: 480px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Event Header */
+.event-header {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.img-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.event-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: subtleZoom 10s infinite alternate ease-in-out;
+}
+
+.gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    var(--bg-color) 0%,
+    rgba(15, 15, 19, 0) 100%
+  );
+}
+
+.event-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  z-index: 2;
+}
+
+.event-title {
+  margin: 0 0 5px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.event-details {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 5px;
+}
+
+.event-date,
+.event-time {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.event-date svg,
+.event-time svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Form Styles */
+.volunteer-form {
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.input-group {
+  position: relative;
+  width: 100%;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 16px 16px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text-main);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  appearance: none;
+}
+
+/* Dropdown arrow recreation for consistency */
+.input-group select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23A0A0A5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px top 50%;
+  background-size: 12px auto;
+}
+
+.input-group label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: 0.3s ease all;
+}
+
+/* Floating Label Logic */
+.input-group input:focus ~ label,
+.input-group input:not(:placeholder-shown) ~ label,
+.input-group select:focus ~ label,
+.input-group select:valid ~ label {
+  top: 12px;
+  font-size: 0.75rem;
+  color: #96c93d;
+}
+
+/* Readonly visual state */
+.input-group input[readonly] {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+}
+
+/* Neon Glow Effect */
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #96c93d;
+  box-shadow: var(--neon-green-shadow);
+}
+
+/* Submit Button */
+.submit-btn {
+  position: relative;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--vhgreen-grad);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.top-bar {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+.top-icons {
+  display: flex !important;
+  margin-left: auto !important;
+  gap: 8px !important;
+}
+
+.top-icons .icon-btn {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.submit-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--vhviolet-grad);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.submit-btn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.submit-btn:disabled {
+  background: var(--glass-border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submit-btn:not(:disabled) {
+  box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.toast {
+  padding: 14px 20px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.toast.success {
+  background: var(--vhgreen-grad);
+}
+
+.toast.error {
+  background: var(--vhred-grad);
+}
+
+.toast.fade-out {
+  animation: fadeOut 0.4s ease forwards;
+}
+
+/* Animations */
+@keyframes subtleZoom {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

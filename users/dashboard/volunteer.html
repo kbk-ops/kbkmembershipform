@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volunteer Hub</title>
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <link rel="stylesheet" href="volunteer.css">
+  <link rel="stylesheet" href="topbottom.css">
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div class="volunteer-hub-container">
+    <div class="glass-card fade-in">
+
+      <div class="event-header">
+        <div class="img-wrapper">
+          <img src="https://res.cloudinary.com/dlte9ybza/image/upload/f_auto,q_auto,w_800/v1773979748/kbk_bingo_ibw5zb.jpg" alt="KBK Bingo Social" class="event-img" />
+          <div class="gradient-overlay"></div>
+        </div>
+        <div class="event-info">
+          <h2 class="event-title">KBKAI Bingo Social</h2>
+          <p class="event-date">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            April 19, 2025
+          </p>
+          <p class="event-time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            12:00 PM
+          </p>
+        </div>
+      </div>
+
+      <form id="volunteerForm" class="volunteer-form">
+        <div class="input-group">
+          <input type="text" id="idNumber" placeholder=" " required autocomplete="off">
+          <label for="idNumber">ID Number</label>
+          <div class="input-glow"></div>
+        </div>
+
+        <div class="input-group">
+          <input type="text" id="memberName" placeholder=" " readonly required>
+          <label for="memberName">Name (Auto-populated)</label>
+          <div class="input-glow"></div>
+        </div>
+
+        <div class="input-group">
+          <select id="volunteerRole" required>
+            <option value="" disabled selected hidden></option>
+            <option value="Attendance Facilitator">Attendance Facilitator</option>
+            <option value="Event Marshal">Event Marshal</option>
+            <option value="Event Maintenance">Event Maintenance</option>
+          </select>
+          <label for="volunteerRole">Volunteer As</label>
+          <div class="input-glow"></div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="submit-btn" disabled>
+          <span class="btn-text">Sign Up for Event</span>
+          <div class="spinner hidden"></div>
+        </button>
+      </form>
+
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="supabaseClient.js"></script>
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+  <script src="volunteer.js"></script>
+</body>
+
+</html>
