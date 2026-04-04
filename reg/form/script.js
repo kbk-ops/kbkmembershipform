@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       const { error } = await _supabase
-        .from("kbk_membership_data")
+        .from("members_data")
         .insert([payload]);
       if (error) throw error;
 
