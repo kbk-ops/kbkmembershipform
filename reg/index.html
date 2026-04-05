@@ -4,41 +4,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Officers Login</title>
+  <title>Registration</title>
 
   <link rel="icon" href="../Kasangga New Logo Small.png" type="image/x-icon">
   <link rel="stylesheet" href="style.css">
 
-  <!-- Prevent browser caching -->
-  <meta http-equiv="Cache-Control" content="no-store" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-  <!-- Particles Background -->
-  <canvas id="particles-bg"></canvas>
+  <!-- Animated Background -->
+  <div class="bg-animation">
+    <span class="blob green"></span>
+    <span class="blob orange"></span>
+  </div>
 
-  <!-- Centering Wrapper -->
   <div class="page-center">
-    <div class="container">
-      <img src="../Clips/kbkheader.png" class="logo animate-fade" alt="logo">
+    <div class="container glass">
+
+      <img src="https://res.cloudinary.com/dlte9ybza/image/upload/f_auto,q_auto,w_250/v1773671813/KBK_Header_White_ghqcjv.png" alt="logo">
 
       <div id="loader" class="loader" style="display:none;"></div>
 
-      <p class="animate-fade delay-1">Register</p>
-      <p id="error" class="animate-fade delay-2"></p>
+      <p class="title animate-fade delay-1">Register</p>
+      <p id="error" class="error animate-fade delay-2"></p>
 
       <!-- Step 1 -->
       <div id="step1" class="animate-fade delay-3">
-        <label>Refferer ID</label>
+        <label>Referrer ID</label>
         <input id="idNumber" placeholder="Enter Referrer ID Number">
         <button id="nextBtn">Next</button>
-
-        <p class="hint">Be a part of our Growing Community</p>
+        <p class="hint">Be a part of our growing community</p>
       </div>
 
       <!-- Step 2 -->
@@ -46,13 +43,12 @@
         <label>Email Address</label>
         <input id="email" type="email" placeholder="Enter Email Address">
         <button id="continueBtn">Continue</button>
-
-        <p class="hint">Be a part of our Growing Community</p>
+        <p class="hint">Be a part of our growing community</p>
       </div>
+
     </div>
   </div>
 
-  <script src="../particles.js"></script>
   <script src="script.js"></script>
 </body>
 
