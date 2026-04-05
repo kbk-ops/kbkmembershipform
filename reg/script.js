@@ -1,8 +1,5 @@
 const FUNCTION_URL = "https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer";
 
-// -------------------------
-// DOM ELEMENTS
-// -------------------------
 const step1 = document.getElementById("step1");
 const step2 = document.getElementById("step2");
 const idNumberInput = document.getElementById("idNumber");
@@ -12,9 +9,6 @@ const loader = document.getElementById("loader");
 const nextBtn = document.getElementById("nextBtn");
 const continueBtn = document.getElementById("continueBtn");
 
-// -------------------------
-// STATE
-// -------------------------
 sessionStorage.clear();
 let currentReferrerData = null;
 
