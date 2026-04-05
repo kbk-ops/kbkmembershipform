@@ -1,6 +1,3 @@
-// -------------------------
-// CONFIG
-// -------------------------
 const FUNCTION_URL = "https://ayynblvknxuvazbwpxpm.supabase.co/functions/v1/validate-referrer";
 
 // -------------------------
