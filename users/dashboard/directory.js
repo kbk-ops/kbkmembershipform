@@ -40,6 +40,11 @@ const fields = [
     label: "Position",
     type: "select",
     options: [
+	  "President",
+	  "Vice-President",
+	  "Sec. Gen.",
+	  "Treasurer",
+	  "Auditor",
       "Barangay Manager",
       "Asst. Barangay Manager",
       "Secretary",
@@ -219,9 +224,9 @@ function renderPagination() {
   `;
 
   // Simple visible page window logic
-  let startPage = Math.max(1, state.currentPage - 2);
-  let endPage = Math.min(state.totalPages, startPage + 4);
-  startPage = Math.max(1, endPage - 4);
+  let startPage = Math.max(1, state.currentPage - 1);
+  let endPage = Math.min(state.totalPages, startPage + 2);
+  startPage = Math.max(1, endPage - 2);
 
   for (let i = startPage; i <= endPage; i++) {
     container.innerHTML += `<button onclick="fetchMembers(${i}, state.searchTerm)" class="${
