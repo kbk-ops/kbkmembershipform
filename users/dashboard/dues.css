@@ -11,7 +11,7 @@ body {
   padding-top: 75px;
   padding-bottom: 110px;
   min-height: 100vh;
-  overflow-y: hidden;
+  overflow-y: auto;
   position: relative;
   visibility: hidden;
 }
