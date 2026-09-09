@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly Dues</title>
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <link rel="stylesheet" href="contri.css">
+  <link rel="stylesheet" href="topbottom.css">
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+  <div class="background-gradient"></div>
+
+  <div class="app-container glass-panel fade-in">
+
+    <div id="initialSkeleton" class="skeleton-wrapper">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text"></div>
+    </div>
+
+    <div id="noDataMessage" class="hidden message-container">
+      <h3><span id="msgFirstName" class="error-text">Hello!</span></h3><br>
+      <p>Our records shows that you are not yet paying our monthly organization dues.</p><br>
+      <p>To remain a member in good standing and continue enjoying all member benefits,</p><br>
+      <p>please coordinate with your Barangay Officers as soon as possible.</p>
+      <br>
+      <p>Thank you for your prompt attention.</p>
+    </div>
+
+    <div id="mainDashboard" class="hidden fade-in dashboard-layout">
+
+      <div class="filter-container">
+        <div class="filter-grid" id="filterGrid">
+          <div class="input-group" id="grpSearch">
+            <label>Search</label>
+            <input type="text" id="filterSearch" placeholder="ID, First or Last Name">
+          </div>
+          <div class="input-group" id="grpBarangay">
+            <label>Barangay</label>
+            <select id="filterBarangay">
+              <option value="All">All</option>
+            </select>
+          </div>
+          <div class="input-group" id="grpDistrict">
+            <label>District</label>
+            <select id="filterDistrict">
+              <option value="All">All</option>
+            </select>
+          </div>
+          <div class="input-group" id="grpMonth">
+            <label>Month</label>
+            <select id="filterMonth">
+              <option value="All">All</option>
+            </select>
+          </div>
+          <div class="input-group" id="grpYear">
+            <label>Year</label>
+            <select id="filterYear">
+              <option value="All">All</option>
+            </select>
+          </div>
+          <div class="input-group" id="grpReceivedBy">
+            <label>Received By</label>
+            <select id="filterReceivedBy">
+              <option value="All">All</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="btnGenerate" class="btn-gradient-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 18V12M10 18V9M14 18V6" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M18 8V14M18 14L16 12M18 14L20 12" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Generate
+          </button>
+		  
+          <button id="btnDownload" class="btn-gradient-red btn-icon" disabled>
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 4V14" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M9 11L12 14L15 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M5 18H19" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+            Download
+          </button>
+        </div>
+      </div>
+
+      <div id="tableSection" class="table-container glass-panel hidden">
+        <div class="table-scroll-wrapper">
+          <table id="contributionsTable">
+            <thead>
+              <tr>
+                <th>ID Number</th>
+                <th>Full Name</th>
+                <th>Barangay</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Amount</th>
+                <th>Posted</th>
+                <th>Received By</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+            <tfoot id="tableFooter">
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="pagination-container hidden" id="paginationControls">
+          <button id="pageFirst">&lt;&lt;</button>
+          <button id="pagePrev">&lt;</button>
+          <span id="pageNumbers"></span>
+          <button id="pageNext">&gt;</button>
+          <button id="pageLast">&gt;&gt;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="supabaseClient.js"></script>
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+  <script src="contri.js"></script>
+</body>
+
+</html>

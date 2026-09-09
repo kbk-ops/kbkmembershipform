@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>KBKAI Directory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="topbottom.css">
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div class="bg-gradient-container">
+    <div class="gradient-blob violet"></div>
+    <div class="gradient-blob green"></div>
+  </div>
+
+  <div class="app-container">
+
+    <main>
+      <section class="search-section">
+        <div class="search-wrapper glass-panel">
+          <div class="input-group">
+            <input type="text" id="searchInput" placeholder=" " autocomplete="off">
+            <label for="searchInput">Search by ID, First, or Last Name</label>
+            <button class="search-btn" aria-label="Search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </div>
+        </div><br>
+
+        <div id="inactiveErrorMsg" class="error-msg hidden">
+          ID Number belongs to Inactive member, Please advise the individual to coordinate with their respective barangay officers.
+        </div>
+      </section>
+
+      <section class="directory-section">
+        <div id="membersGrid" class="members-grid">
+        </div>
+
+        <div id="emptyState" class="empty-state hidden glass-panel">
+          <p>No active members found matching your search.</p>
+        </div>
+      </section>
+
+      <div id="pagination" class="pagination-container">
+      </div>
+    </main>
+  </div>
+
+  <div id="detailsModal" class="modal hidden">
+    <div class="modal-content glass-panel">
+      <button id="closeModal" class="close-btn" aria-label="Close modal">&times;</button>
+      <div id="modalBody">
+      </div>
+    </div>
+  </div>
+
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KBK Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="Kasangga New Logo Small.png" type="image/x-icon">
+  <style>
+    :root {
+      --bg-dark: #080A0F;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #FFFFFF;
+      --text-muted: #8A93A6;
+      /* Accent Colors */
+      --violet: #8B5CF6;
+      --green: #10B981;
+      --orange: #F97316;
+      --red: #EF4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Gradient Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, #161b22 0%, #080a0f 100%);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.2;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      top: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: var(--violet);
+    }
+
+    .blob-2 {
+      bottom: -10%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: var(--red);
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(15%, 10%) scale(1.2);
+      }
+    }
+
+    /* --- Header & Beating Logo --- */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 1.5rem 3rem;
+      z-index: 2;
+    }
+
+    .logo-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* The Beating Animation */
+      animation: beat 6s ease-in-out infinite;
+    }
+
+    #logo {
+      display: block;
+      opacity: 0;
+      transition: opacity 1s ease-in;
+      /* Emboss effect + Neon White Glow */
+      /* filter: drop-shadow(offset-x offset-y blur color) */
+      filter:
+        drop-shadow(2px 2px 1px rgba(0, 0, 0, 0.7))
+        /* Dark Emboss Shadow */
+        drop-shadow(-1px -1px 1px rgba(255, 255, 255, 0.25))
+        /* Light Emboss Edge */
+        drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+      /* Initial Glow */
+      animation: neonGlow 6s ease-in-out infinite;
+    }
+
+    @keyframes beat {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      15% {
+        transform: scale(1.05);
+      }
+
+      30% {
+        transform: scale(1);
+      }
+
+      45% {
+        transform: scale(1.08);
+      }
+
+      60% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes neonGlow {
+
+      0%,
+      100% {
+        filter:
+          drop-shadow(2px 2px 1px rgba(0, 0, 0, 0.7)) drop-shadow(-1px -1px 1px rgba(255, 255, 255, 0.25)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+      }
+
+      50% {
+        filter:
+          drop-shadow(2px 2px 1px rgba(0, 0, 0, 0.8)) drop-shadow(-1px -1px 1px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 25px rgba(255, 255, 255, 0.5));
+      }
+    }
+
+    /* --- Main Grid Layout --- */
+    main {
+      width: 100%;
+      max-width: 1200px;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      /* Mobile */
+      gap: 1.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      z-index: 2;
+    }
+
+    main.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (min-width: 768px) {
+      main {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* --- Glass Cards --- */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Card Accents */
+    .card-violet:hover {
+      box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.3);
+    }
+
+    .card-green:hover {
+      box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.3);
+    }
+
+    .card-orange:hover {
+      box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.3);
+    }
+
+    .icon-box {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      transition: transform 0.5s ease;
+    }
+
+    .card:hover .icon-box {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .card-violet .icon-box {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--violet);
+    }
+
+    .card-green .icon-box {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+    }
+
+    .card-orange .icon-box {
+      background: rgba(249, 115, 22, 0.15);
+      color: var(--orange);
+    }
+
+    .icon-box svg {
+      width: 34px;
+      height: 34px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* --- Footer --- */
+    footer {
+      margin: 4rem 0 2rem;
+      z-index: 2;
+    }
+
+    .footer-text {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-animation">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <header>
+    <div class="logo-wrapper">
+      <img id="logo" src="https://res.cloudinary.com/dlte9ybza/image/upload/v1773671813/KBK_Header_White_ghqcjv.png" alt="KBK Logo">
+    </div>
+  </header>
+
+  <main id="main-ui">
+    <div class="card card-violet" onclick="location.href='users/index.html'">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </div>
+      <h2>Community Portal</h2>
+      <p>Access community updates and resources.</p>
+      <p>For existing members only.</p>
+    </div>
+
+    <div class="card card-green" onclick="location.href='reg/index.html'">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <polyline points="16 11 18 13 22 9"></polyline>
+        </svg>
+      </div>
+      <h2>Registration Portal</h2>
+      <p>Onboarding for new members.</p>
+    </div>
+
+    <div class="card card-orange" onclick="location.href='partner/index.html'">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+      </div>
+      <h2>Partner's Portal</h2>
+      <p>For affiliates and partners.</p>
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-text">Select your portal to continue</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const logo = document.getElementById('logo');
+      const mainUI = document.getElementById('main-ui');
+      // Responsive Logo Scaling (A bit bigger as requested)
+      const handleResize = () => {
+        const w = window.innerWidth;
+        if (w < 480) logo.style.width = "260px";
+        else if (w < 768) logo.style.width = "340px";
+        else logo.style.width = "420px";
+      };
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      // Onload sequence
+      logo.onload = () => {
+        logo.style.opacity = '1';
+      };
+      // Fallback if cached
+      if (logo.complete) logo.style.opacity = '1';
+      setTimeout(() => {
+        mainUI.classList.add('loaded');
+      }, 300);
+    });
+  </script>
+</body>
+
+</html>

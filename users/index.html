@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KBK Secure Login</title>
+  <link rel="stylesheet" href="login.css">
+
+  <link rel="icon" href="../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <!-- Prevent browser caching -->
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div class="background-anim"></div>
+
+  <main class="login-container">
+    <div class="logo-container">
+      <img src="https://res.cloudinary.com/dlte9ybza/image/upload/v1773671813/KBK_Header_White_ghqcjv.png" alt="KBK Logo" class="logo">
+    </div>
+
+    <div class="glass-card">
+      <div id="step-1" class="step active">
+        <h2>Welcome</h2>
+        <p>Please enter your ID number to continue.</p>
+
+        <form id="form-id" class="form-group">
+          <label for="id_number">KBK ID Number</label>
+          <input type="text" id="id_number" autocomplete="off" placeholder="Enter your ID" required>
+          <div id="error-id" class="error-msg"></div>
+
+          <button type="submit" id="btn-id" class="btn-primary">
+            <span class="btn-text">Continue</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+      </div>
+
+      <div id="step-2" class="step">
+        <h2>Enter PIN</h2>
+        <p>Enter your 6-digit secure PIN.</p>
+
+        <form id="form-pin" class="form-group">
+          <div class="pin-container" id="login-pin-group">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+          </div>
+          <div id="error-pin" class="error-msg"></div>
+
+          <button type="button" class="btn-text-only" onclick="goBackToId()">Change ID Number</button>
+        </form>
+      </div>
+
+      <div id="step-3" class="step">
+        <h2>Create New PIN</h2>
+        <p class="warning-text">For your security, please create a new 6-digit PIN.</p>
+
+        <form id="form-change-pin" class="form-group">
+          <label>New PIN</label>
+          <div class="pin-container" id="new-pin-group">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+          </div>
+
+          <label class="mt-4">Confirm New PIN</label>
+          <div class="pin-container" id="confirm-pin-group">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+          </div>
+
+          <div id="error-change-pin" class="error-msg"></div>
+
+          <button type="submit" id="btn-change-pin" class="btn-primary mt-4">
+            <span class="btn-text">Confirm & Save</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+      </div>
+
+      <div id="success-overlay" class="step">
+        <div class="success-checkmark">
+          <div class="check-icon"></div>
+        </div>
+        <h2>Success!</h2>
+        <p>Redirecting to your dashboard...</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="login.js"></script>
+</body>
+
+</html>

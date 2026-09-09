@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Community Dashboard</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="topbottom.css">
+
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="dark-mode">
+  <main id="scroll-area">
+    <section class="greeting-section" id="greeting-box">
+      <div class="profile-container" onclick="location.href='profile.html'">
+        <img id="profile-pic" src="data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <circle cx='50' cy='50' r='50' fill='%23334155'/>
+    <circle cx='50' cy='40' r='20' fill='%239ca3af'/>
+    <rect x='25' y='60' width='50' height='25' rx='12' fill='%239ca3af'/>
+  </svg>" alt="Profile" class="skeleton-img">
+      </div>
+      <div class="greeting-text">
+        <h2 id="user-greeting" class="skeleton skeleton-text">Username</h2>
+        <p id="current-date"></p>
+      </div>
+    </section>
+
+    <section class="stats-section">
+      <div class="kpi-card glass skeleton-wrapper" id="active-members-card">
+        <span class="kpi-title skeleton skeleton-text">Active Members</span>
+        <h1 id="active-count" class="green-text skeleton skeleton-count">00</h1>
+      </div>
+    </section>
+
+    <div class="grid-container" id="role-grid">
+      <div class="role-card glass skeleton skeleton-card"></div>
+      <div class="role-card glass skeleton skeleton-card"></div>
+    </div><br>
+
+    <section class="carousel-container">
+      <h3>Previous Event Highlights</h3>
+      <div class="carousel-wrapper">
+
+        <button class="carousel-arrow prev" id="prev">&#10094;</button>
+        <button class="carousel-arrow next" id="next">&#10095;</button>
+
+        <div class="carousel-bullets" id="carousel-bullets"></div>
+
+        <div class="carousel-track" id="carousel">
+        </div>
+      </div>
+    </section>
+
+    <section class="events-section">
+      <h3>Upcoming Events</h3><br>
+      <div id="events-list">
+      </div>
+    </section>
+  </main>
+
+  <div id="promo-overlay" class="overlay-container hidden">
+    <div class="overlay-content glass">
+      <button id="close-overlay" class="close-btn" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <h2>What’s New at KBKAI!</h2>
+      <p>KBKAI is proud to announce an exciting new partnership with Team Protech, bringing members access to fast, reliable internet service tailored to our everyday digital needs. Whether you're working from home, streaming your favorite content, or staying connected with loved ones, these plans are designed to keep up with your lifestyle—without breaking the bank.</p>
+
+      <h3>Affordable Plans to Choose From:</h3>
+      <ul>
+        <li><strong>Plan 799</strong> – Up to 50 Mbps</li>
+        <li><strong>Plan 999</strong> – Up to 200 Mbps</li>
+        <li><strong>Plan 1299</strong> – Up to 350 Mbps</li>
+      </ul>
+      <p>With competitive pricing and dependable performance, there’s a plan for every type of user.</p>
+
+      <h3>Service Availability:</h3>
+      <p>KBKAI members can now apply for Team Protech internet service in the following selected areas:</p>
+      <ul class="brgy-list">
+        <li>Brgy. 170</li>
+        <li>Brgy. 172</li>
+        <li>Brgy. 174</li>
+        <li>Brgy. 175</li>
+        <li>Brgy. 178</li>
+        <li>Brgy. 179</li>
+        <li>Brgy. 180</li>
+        <li>Brgy. 183</li>
+        <li>Brgy. 186</li>
+        <li>Brgy. 187</li>
+      </ul>
+
+      <p>Don’t miss out on this opportunity to upgrade your internet experience. Apply today and enjoy seamless connectivity with KBKAI and Team Protech!</p>
+
+      <button class="apply-btn grad-green" onclick="goToApply()">
+        Apply Now
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="supabaseClient.js"></script>
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

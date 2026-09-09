@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership Form</title>
+  <link rel="icon" href="../../Kasangga New Logo Small.png">
+
+  <link rel="stylesheet" href="style.css">
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div id="app" class="app hidden">
+
+    <div class="topbar">
+      <img src="https://res.cloudinary.com/dlte9ybza/image/upload/f_auto,q_auto,w_200/v1773671813/KBK_Header_White_ghqcjv.png" class="top-logo" onclick="showTab('homeTab')" alt="logo">
+      <img src="https://raw.githubusercontent.com/kbk-ops/kbkai/main/Icons/about.png" class="about" onclick="window.location.href='about.html'" alt="about">
+    </div>
+
+    <div id="homeTab" class="tab-content active">
+      <div class="form-header">
+        <h2>Membership Form</h2>
+        <p>Complete the steps below to register</p>
+      </div>
+
+      <form id="memberForm">
+
+        <div class="step-card">
+          <div class="step-title"><span>1</span> Profile Picture</div>
+          <div class="camera-container">
+            <div class="img-preview" id="previewArea"><span>No Photo</span></div>
+            <input type="file" id="photoInput" accept="image/*" capture="user" style="display:none">
+            <button type="button" class="btn-camera" onclick="document.getElementById('photoInput').click()">Take / Upload Photo</button>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-title"><span>2</span> Personal Information</div>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <input type="text" id="firstName" maxlength="50" placeholder=" " required>
+              <label>First Name*</label>
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="middleName" minlength="3" maxlength="30" placeholder=" " required>
+              <label>Middle Name*</label>
+              <div class="checkbox-group">
+                <input type="checkbox" id="noMiddleName" onchange="toggleMiddleName()">
+                <label for="noMiddleName" class="static-label">No Middle Name</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="lastName" maxlength="30" placeholder=" " required>
+              <label>Last Name*</label>
+            </div>
+
+            <div class="form-group">
+              <select id="suffix">
+                <option value="">None</option>
+                <option value="Sr.">Sr.</option>
+                <option value="Jr.">Jr.</option>
+                <option value="III">III</option>
+              </select>
+              <label class="select-label">Suffix</label>
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="dob" placeholder=" " inputmode="numeric" maxlength="10" required>
+              <label>Date of Birth*</label>
+              <small class="hint-text">Format: MM/DD/YYYY (e.g., 05/20/1990)</small>
+            </div>
+
+            <div class="form-group">
+              <select id="gender" required>
+                <option value="" disabled selected hidden></option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <label class="select-label">Gender*</label>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-title"><span>3</span> Contact & Location</div>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <input type="text" inputmode="numeric" id="phone" maxlength="11" placeholder=" " required>
+              <label>Phone Number (09xxxxxxxxx)*</label>
+            </div>
+
+            <div class="form-group full-width">
+              <input type="text" id="address" maxlength="80" placeholder=" " required>
+              <label>Address*</label>
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="barangay" pattern="^(?:[1-9][0-9]?|1[0-6][0-9]|17[0-5]|17[7-9]|18[0-8]|176-[A-F])$" placeholder=" " required>
+              <label>Barangay (e.g. 176-A)*</label>
+              <small class="hint-text">Input valid Caloocan City barangay number only</small>
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="precinct" pattern="^(N\/A|[A-Za-z0-9]{5,6})$" minlength="3" maxlength="6" placeholder=" " required>
+              <label>Precinct Number*</label>
+              <div class="checkbox-group">
+                <input type="checkbox" id="noPrecint" onchange="togglePrecintNo()">
+                <label for="noPrecint" class="static-label">Not a registered voter</label>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <select id="position" required disabled>
+                <option value="">Select Barangay First</option>
+              </select>
+              <label class="select-label">Position*</label>
+            </div>
+
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <span>Submit Registration</span>
+        </button>
+      </form>
+    </div>
+
+    <div id="loadingOverlay">
+      <div class="message-box">
+        <div class="loader" id="spinner"></div>
+        <h3 id="overlayTitle">Submitting...</h3>
+        <p id="overlayText"></p>
+        <button id="closeBtn" style="display:none" onclick="window.location.replace('../return/index.html')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

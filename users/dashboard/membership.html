@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership Data</title>
+  <link rel="icon" href="../../Kasangga New Logo Small.png" type="image/x-icon">
+
+  <link rel="stylesheet" href="member.css">
+  <link rel="stylesheet" href="topbottom.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <main class="dashboard-container">
+    <section class="controls-section glass-card">
+      <div class="filters-grid" id="filters-container">
+        <div class="input-group search-group">
+          <label for="searchInput" class="filter-label">Search</label>
+          <input type="text" id="searchInput" placeholder="Search ID, First or Last Name...">
+        </div>
+      </div>
+      <div class="actions-grid">
+        <button id="btnGenerate" class="btn btn-generate">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Generate
+        </button>
+        <button id="btnDownload" class="btn btn-download" disabled>
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          Download PDF
+        </button>
+      </div>
+    </section>
+
+    <section class="kpi-grid" id="kpi-container">
+      <div class="kpi-card skeleton-box"></div>
+      <div class="kpi-card skeleton-box"></div>
+      <div class="kpi-card skeleton-box"></div>
+      <div class="kpi-card skeleton-box"></div>
+    </section>
+
+    <section class="chart-grid">
+      <div class="glass-card chart-card">
+        <h3>Age Distribution</h3>
+        <div id="ageChartSkeleton" class="skeleton-box chart-skeleton"></div>
+        <div class="chart-wrapper hidden" id="ageChartWrapper">
+          <canvas id="ageChart"></canvas>
+        </div>
+      </div>
+      <div class="glass-card chart-card">
+        <h3>Gender Distribution</h3>
+        <div id="genderChartSkeleton" class="skeleton-box chart-skeleton"></div>
+        <div class="chart-wrapper hidden" id="genderChartWrapper">
+          <canvas id="genderChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="data-section glass-card">
+      <div class="data-header">
+        <h3>Member Directory</h3>
+        <div class="toggle-switch">
+          <input type="checkbox" id="viewToggle" class="toggle-checkbox">
+          <label for="viewToggle" class="toggle-label">
+            <span class="toggle-inner"></span>
+            <span class="toggle-switch-ui"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="data-container scrollable-container">
+        <div id="dataLoader" class="skeleton-box data-skeleton hidden"></div>
+
+        <div id="cardView" class="card-view-grid active"></div>
+
+        <div id="tableView" class="table-view-container hidden">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th data-sort="id_number">ID Number ↕</th>
+                <th data-sort="first_name">Full Name ↕</th>
+                <th>Address</th>
+                <th>Phone Number</th>
+                <th data-sort="barangay">Barangay ↕</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="pagination" class="pagination-controls"></div>
+    </section>
+  </main>
+
+  <script src="supabaseClient.js"></script>
+  <script src="authGuard.js"></script>
+  <script src="components.js"></script>
+  <script src="member.js"></script>
+</body>
+
+</html>
